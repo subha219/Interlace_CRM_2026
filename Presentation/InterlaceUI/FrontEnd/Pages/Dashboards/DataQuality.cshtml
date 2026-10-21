@@ -1,0 +1,55 @@
+@page
+@{
+    ViewData["Title"] = "Data Quality";
+}
+
+<div id="app" v-cloak>
+    <div class="card mb-3">
+        <div class="card-body d-flex flex-wrap align-items-center gap-4">
+            <div style="position:relative;width:120px;height:120px">
+                <svg viewBox="0 0 120 120" width="120" height="120">
+                    <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border, #dee2e6)" stroke-width="10" />
+                    <circle cx="60" cy="60" r="52" fill="none" :stroke="color(state.score)" stroke-width="10" stroke-linecap="round"
+                            :stroke-dasharray="326.7" :stroke-dashoffset="326.7 * (1 - state.score / 100)" transform="rotate(-90 60 60)" />
+                </svg>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                    <strong style="font-size:1.8rem;line-height:1">{{ state.score }}</strong><span class="small text-muted">of 100</span>
+                </div>
+            </div>
+            <div class="flex-grow-1">
+                <h5 class="mb-1">CRM data health</h5>
+                <p class="text-muted mb-2">Share of records that pass each check. Fix the red items first: missing e-mails and owners, stale leads and duplicates cost the most.</p>
+                <button class="btn btn-sm btn-outline-primary" @@click="load" :disabled="state.loading">Refresh</button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="state.loading" class="text-muted">Checking your data...</div>
+
+    <div class="card mb-3" v-for="g in groups" :key="g.entity">
+        <div class="card-header"><h5 class="mb-0">{{ g.entity }}</h5></div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item" v-for="c in g.checks" :key="c.key">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="badge" :class="c.count === 0 ? 'bg-success' : c.severity === 'high' ? 'bg-danger' : c.severity === 'medium' ? 'bg-warning text-dark' : 'bg-secondary'" style="min-width:34px">{{ c.count }}</span>
+                    <div class="flex-grow-1">
+                        <div>{{ c.label }}</div>
+                        <div class="progress" style="height:5px"><div class="progress-bar" :style="{ width: c.percent + '%', background: color(c.percent) }"></div></div>
+                    </div>
+                    <span class="small text-muted">{{ c.percent }}% ok ({{ c.total }})</span>
+                    <button class="btn btn-sm btn-outline-secondary" v-if="c.count" @@click="state.open = state.open === c.key ? '' : c.key">{{ state.open === c.key ? 'Hide' : 'Show' }}</button>
+                    <button class="btn btn-sm btn-outline-primary" v-if="c.count && c.canAssignOwner" @@click="assign(c)">Assign all to me</button>
+                    <a class="btn btn-sm btn-primary" v-if="c.count && c.fixUrl" :href="c.fixUrl">Fix</a>
+                </div>
+                <div class="mt-2 small" v-if="state.open === c.key">
+                    <div v-for="s in c.samples" :key="s.id" class="text-muted">{{ s.number }} {{ s.name }}</div>
+                    <div class="text-muted" v-if="c.count > c.samples.length">... and {{ c.count - c.samples.length }} more</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Dashboards/DataQuality.cshtml.js"></script>
+}

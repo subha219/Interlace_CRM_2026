@@ -1,0 +1,33 @@
+@page
+@{
+    ViewData["Title"] = "Help Centre";
+}
+
+<div id="app" v-cloak>
+    <div v-if="state.article">
+        <a href="#" class="small" @@click.prevent="back">&larr; All articles</a>
+        <h1 class="auth-title mt-2">{{ state.article.title }}</h1>
+        <div style="white-space:pre-wrap;text-align:left">{{ state.article.body }}</div>
+        <div class="mt-3 small text-muted" v-if="!state.rated">Was this helpful?
+            <button class="btn btn-sm btn-outline-success ms-2" @@click="rate(true)">Yes</button>
+            <button class="btn btn-sm btn-outline-secondary" @@click="rate(false)">No</button></div>
+        <div class="mt-3 small text-muted" v-else>Thanks for your feedback.</div>
+    </div>
+    <div v-else>
+        <div class="auth-status"><h1 class="auth-title">Help centre</h1><p class="auth-sub">Search our articles for quick answers.</p></div>
+        <form class="d-flex gap-2 mb-3" v-on:submit.prevent="search">
+            <input class="form-control" placeholder="What do you need help with?" maxlength="100" v-model="state.q" />
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+        <p class="text-muted small" v-if="state.loaded && !state.rows.length">No articles found.</p>
+        <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action" v-for="a in state.rows" :key="a.id" @@click.prevent="open(a.id)">
+                <div class="fw-semibold">{{ a.title }}</div><div class="small text-muted">{{ a.summary }}</div>
+            </a>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Accounts/HelpCenter.cshtml.js"></script>
+}

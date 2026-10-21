@@ -1,0 +1,94 @@
+@page
+@{
+    ViewData["Title"] = "Customer Portal";
+}
+
+<div id="app" v-cloak>
+    <div class="auth-status" v-if="state.mode === 'busy'"><p class="auth-sub">Loading...</p></div>
+
+    <div v-else-if="state.mode === 'login'">
+        <div class="auth-status"><h1 class="auth-title">Customer portal</h1><p class="auth-sub">Enter your e-mail address and we will send you a sign-in link.</p></div>
+        <form v-on:submit.prevent="requestLink">
+            <input type="email" class="form-control mb-3" placeholder="you@company.com" maxlength="255" required v-model="state.email" />
+            <button type="submit" class="auth-btn" :disabled="state.working">{{ state.working ? 'Please wait...' : 'Send me a link' }}</button>
+            <div class="text-danger small mt-2" v-if="state.error">{{ state.error }}</div>
+        </form>
+        <div class="auth-links"><a href="/Accounts/HelpCenter">Browse the help centre</a></div>
+    </div>
+
+    <div class="auth-status" v-else-if="state.mode === 'sent'">
+        <h1 class="auth-title">Check your e-mail</h1>
+        <p class="auth-sub">If this address belongs to a customer, a sign-in link is on its way. It works once and expires in 30 minutes.</p>
+        <a href="#" @@click.prevent="state.mode = 'login'">Use another address</a>
+    </div>
+
+    <div v-else-if="state.mode === 'home' && state.data">
+        <div class="d-flex align-items-center mb-2">
+            <div class="flex-grow-1"><strong>{{ state.data.customerName }}</strong></div>
+            <a href="#" class="small" @@click.prevent="logout">Sign out</a>
+        </div>
+        <ul class="nav nav-pills mb-3">
+            <li class="nav-item" v-for="t in tabs" :key="t.key"><a class="nav-link py-1 px-2" href="#" :class="{ active: state.tab === t.key }" @@click.prevent="state.tab = t.key">{{ t.label }}</a></li>
+        </ul>
+
+        <div v-if="state.tab === 'cases'">
+            <p class="text-muted small" v-if="!state.data.cases.length">You have no support cases.</p>
+            <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action" v-for="c in state.data.cases" :key="c.id" @@click.prevent="openCase(c.id)">
+                    <div class="d-flex justify-content-between"><strong>{{ c.title }}</strong><span class="badge bg-secondary">{{ c.status }}</span></div>
+                    <div class="small text-muted">{{ c.number }} · {{ day(c.createdAtUtc) }}</div>
+                </a>
+            </div>
+        </div>
+
+        <div v-else-if="state.tab === 'new'">
+            <input class="form-control mb-2" maxlength="200" placeholder="Short summary" v-model="state.form.title" />
+            <textarea class="form-control mb-2" rows="5" maxlength="4000" placeholder="Describe the problem" v-model="state.form.description"></textarea>
+            <select class="form-select mb-2" v-model="state.form.priority"><option>Low</option><option>Normal</option><option>High</option></select>
+            <button class="auth-btn" :disabled="state.working" @@click="submitCase">Send</button>
+            <div class="text-danger small mt-2" v-if="state.error">{{ state.error }}</div>
+        </div>
+
+        <div v-else-if="state.tab === 'invoices'">
+            <p class="text-muted small" v-if="!state.data.invoices.length">No invoices.</p>
+            <div class="list-group">
+                <div class="list-group-item" v-for="i in state.data.invoices" :key="i.number">
+                    <div class="d-flex justify-content-between"><strong>{{ i.number }}</strong><span class="badge bg-secondary">{{ i.status }}</span></div>
+                    <div class="small text-muted">Dated {{ day(i.invoiceDate) }} · due {{ day(i.dueDate) }}</div>
+                    <div class="small">Total {{ money(i.total) }} · balance <strong>{{ money(i.balance) }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div v-else-if="state.tab === 'contracts'">
+            <p class="text-muted small" v-if="!state.data.contracts.length">No contracts.</p>
+            <div class="list-group">
+                <div class="list-group-item" v-for="c in state.data.contracts" :key="c.number">
+                    <div class="d-flex justify-content-between"><strong>{{ c.title }}</strong><span class="badge bg-secondary">{{ c.status }}</span></div>
+                    <div class="small text-muted">{{ c.number }} · ends {{ day(c.endDate) }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-else-if="state.mode === 'case' && state.cs">
+        <a href="#" class="small" @@click.prevent="back">&larr; My cases</a>
+        <h5 class="mt-2 mb-0">{{ state.cs.case.title }}</h5>
+        <div class="small text-muted mb-2">{{ state.cs.case.number }} · {{ state.cs.case.status }}</div>
+        <div style="white-space:pre-wrap" class="mb-2">{{ state.cs.description }}</div>
+        <div class="alert alert-success py-1 small" v-if="state.cs.resolution"><strong>Resolution:</strong> {{ state.cs.resolution }}</div>
+        <div class="mb-2" v-for="(m, i) in state.cs.comments" :key="i">
+            <div class="small text-muted">{{ m.who }} · {{ day(m.at) }}</div>
+            <div style="white-space:pre-wrap" :class="m.who === 'You' ? 'text-primary' : ''">{{ m.text }}</div>
+        </div>
+        <template v-if="state.cs.case.status !== 'Closed'">
+            <textarea class="form-control mb-2" rows="3" maxlength="4000" placeholder="Write a message" v-model="state.reply"></textarea>
+            <button class="auth-btn" :disabled="state.working || !state.reply.trim()" @@click="sendReply">Send message</button>
+            <div class="text-danger small mt-2" v-if="state.error">{{ state.error }}</div>
+        </template>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Accounts/Portal.cshtml.js"></script>
+}

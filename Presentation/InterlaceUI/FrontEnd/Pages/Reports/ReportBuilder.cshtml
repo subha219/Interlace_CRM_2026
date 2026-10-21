@@ -1,0 +1,128 @@
+﻿@page
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<div id="app" v-cloak>
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-header"><h6 class="mb-0">Saved reports</h6></div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item text-muted" v-if="!state.saved.length">No saved reports yet.</li>
+                    <li class="list-group-item d-flex align-items-center gap-2" v-for="r in state.saved" :key="r.id">
+                        <a href="#" class="flex-grow-1" @@click.prevent="openSaved(r)">{{ r.name }}<div class="small text-muted">{{ entityLabel(r.entity) }}<span v-if="r.isShared"> · shared<span v-if="!r.isMine"> by {{ r.ownerName }}</span></span></div></a>
+                        <button class="btn btn-sm btn-outline-secondary" v-if="r.isMine" @@click="openSchedule(r)" :title="scheduleOf(r) ? 'Scheduled: ' + scheduleOf(r).frequency : 'E-mail this report on a schedule'">{{ scheduleOf(r) ? 'Scheduled' : 'Schedule' }}</button>
+                        <button class="btn btn-sm btn-outline-danger" v-if="r.isMine" @@click="removeSaved(r)">Delete</button>
+                    </li>
+                    <li class="list-group-item" v-if="state.sched">
+                        <div class="small fw-semibold mb-1">E-mail "{{ state.sched.name }}"</div>
+                        <div class="d-flex flex-wrap gap-1 mb-1">
+                            <select class="form-select form-select-sm" style="width:auto" v-model="state.sched.frequency"><option>Daily</option><option>Weekly</option><option>Monthly</option></select>
+                            <select class="form-select form-select-sm" style="width:auto" v-if="state.sched.frequency === 'Weekly'" v-model.number="state.sched.day"><option v-for="(n, i) in ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']" :key="i" :value="i">{{ n }}</option></select>
+                            <select class="form-select form-select-sm" style="width:auto" v-if="state.sched.frequency === 'Monthly'" v-model.number="state.sched.day"><option v-for="n in 28" :key="n" :value="n">day {{ n }}</option></select>
+                            <select class="form-select form-select-sm" style="width:auto" v-model.number="state.sched.hour"><option v-for="h in 24" :key="h" :value="h - 1">{{ String(h - 1).padStart(2, '0') }}:00</option></select>
+                        </div>
+                        <input class="form-control form-control-sm mb-1" maxlength="1000" placeholder="name@company.com, other@company.com" v-model="state.sched.recipients" />
+                        <div class="d-flex align-items-center gap-2 mb-1"><label class="small text-muted mb-0">Attach</label>
+                            <select class="form-select form-select-sm" style="width:auto" v-model="state.sched.attach"><option value="Csv">CSV file</option><option value="Pdf">PDF file</option><option value="Both">CSV and PDF</option></select></div>
+                        <div class="form-check mb-1"><input class="form-check-input" type="checkbox" id="schAct" v-model="state.sched.isActive" /><label class="form-check-label small" for="schAct">Active</label></div>
+                        <div class="small text-muted mb-1" v-if="state.sched.lastStatus">Last run: {{ state.sched.lastStatus }}</div>
+                        <button class="btn btn-sm btn-primary" @@click="saveSchedule">Save</button>
+                        <button class="btn btn-sm btn-outline-danger" v-if="state.sched.exists" @@click="removeSchedule">Stop</button>
+                        <button class="btn btn-sm btn-light" @@click="state.sched = null">Close</button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h6 class="mb-0">Build a report</h6></div>
+                <div class="card-body">
+                    <div v-if="!state.entities.length" class="text-muted small">Your role does not give access to any record type yet.</div>
+                    <div v-else>
+                        <label class="form-label">Report on</label>
+                        <select class="form-select form-select-sm mb-3" v-model="state.def.entity" @@change="resetDef">
+                            <option v-for="e in state.entities" :key="e.key" :value="e.key">{{ e.label }}</option>
+                        </select>
+
+                        <label class="form-label">Show</label>
+                        <select class="form-select form-select-sm mb-3" v-model="state.def.mode">
+                            <option value="list">A list of records</option>
+                            <option value="group">Totals grouped by a field</option>
+                        </select>
+
+                        <div v-if="state.def.mode === 'list'">
+                            <label class="form-label">Columns</label>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <label class="small" v-for="f in fields" :key="f.key"><input type="checkbox" :value="f.key" v-model="state.def.columns" /> {{ f.label }}</label>
+                            </div>
+                            <label class="form-label">Sort by</label>
+                            <div class="d-flex gap-2 mb-3">
+                                <select class="form-select form-select-sm" v-model="state.def.sortBy"><option value="">Newest first</option><option v-for="f in fields" :key="f.key" :value="f.key">{{ f.label }}</option></select>
+                                <select class="form-select form-select-sm" style="width:auto" v-model="state.def.sortDescending"><option :value="false">A-Z / low-high</option><option :value="true">Z-A / high-low</option></select>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <label class="form-label">Group by</label>
+                            <select class="form-select form-select-sm mb-2" v-model="state.def.groupBy"><option v-for="f in fields" :key="f.key" :value="f.key">{{ f.label }}{{ f.type === 'date' ? ' (by month)' : '' }}</option></select>
+                            <label class="form-label">Measure</label>
+                            <select class="form-select form-select-sm mb-3" v-model="state.def.metric">
+                                <option value="count">Number of records</option>
+                                <optgroup label="Total of"><option v-for="f in numeric" :key="'s' + f.key" :value="'sum:' + f.key">{{ f.label }}</option></optgroup>
+                                <optgroup label="Average of"><option v-for="f in numeric" :key="'a' + f.key" :value="'avg:' + f.key">{{ f.label }}</option></optgroup>
+                            </select>
+                        </div>
+
+                        <label class="form-label">Only where</label>
+                        <div class="d-flex flex-wrap gap-1 mb-2" v-for="(f, i) in state.def.filters" :key="i">
+                            <select class="form-select form-select-sm" style="width:auto" v-model="f.field"><option v-for="x in fields" :key="x.key" :value="x.key">{{ x.label }}</option></select>
+                            <select class="form-select form-select-sm" style="width:auto" v-model="f.op"><option v-for="o in operators" :key="o.v" :value="o.v">{{ o.t }}</option></select>
+                            <input class="form-control form-control-sm" style="max-width:130px" v-model="f.value" v-if="f.op !== 'is_empty' && f.op !== 'is_not_empty'" :placeholder="typeOf(f.field) === 'date' ? 'YYYY-MM-DD' : ''" />
+                            <button class="btn btn-sm btn-outline-danger" @@click="state.def.filters.splice(i, 1)">x</button>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary mb-3" @@click="addFilter">Add filter</button>
+
+                        <div><button class="btn btn-primary" @@click="run" :disabled="state.busy">Run report</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card" v-if="state.result">
+                <div class="card-header d-flex flex-wrap align-items-center gap-2">
+                    <h6 class="mb-0 flex-grow-1">{{ state.result.total }} record(s)<span v-if="state.result.truncated" class="text-warning"> (only the newest {{ 20000 }} were read)</span></h6>
+                    <input class="form-control form-control-sm" style="width:170px" v-model="state.saveName" placeholder="Report name" />
+                    <label class="small mb-0"><input type="checkbox" v-model="state.saveShared" /> share</label>
+                    <button class="btn btn-sm btn-outline-primary" @@click="save" :disabled="!state.saveName">Save</button>
+                    <button class="btn btn-sm btn-outline-secondary" @@click="exportCsv">Download CSV</button>
+                </div>
+
+                <div class="card-body" v-if="state.result.grouped && state.result.rows.length">
+                    <div v-for="r in state.result.rows" :key="r[0]" class="d-flex align-items-center gap-2 mb-1">
+                        <div style="width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" :title="r[0]">{{ r[0] }}</div>
+                        <div class="flex-grow-1"><div class="progress" style="height:14px"><div class="progress-bar" :style="{ width: barWidth(r[1]) + '%' }"></div></div></div>
+                        <div style="width:110px;text-align:right">{{ fmt(r[1]) }}</div>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="max-height:60vh">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead><tr><th v-for="c in state.result.columns" :key="c.key" :class="{ 'text-end': c.type === 'number' }">{{ c.label }}</th></tr></thead>
+                        <tbody>
+                            <tr v-if="!state.result.rows.length"><td :colspan="state.result.columns.length" class="text-muted">No records match.</td></tr>
+                            <tr v-for="(r, i) in state.result.rows" :key="i">
+                                <td v-for="(v, j) in r" :key="j" :class="{ 'text-end': state.result.columns[j].type === 'number' }">{{ state.result.columns[j].type === 'number' ? fmt(v) : v }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="text-muted" v-else>Choose what to report on and press Run report.</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Reports/ReportBuilder.cshtml.js"></script>
+}

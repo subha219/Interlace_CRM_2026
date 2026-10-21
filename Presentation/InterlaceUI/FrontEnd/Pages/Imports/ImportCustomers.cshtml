@@ -1,0 +1,51 @@
+﻿@page
+@{
+    ViewData["HideTitle"] = true;
+    ViewData["Title"] = "Import Data";
+}
+
+<div id="app" v-cloak>
+    <div class="page-head">
+        <div>
+            <h1>Import data</h1>
+            <p>Upload a CSV file. Existing records are never overwritten; duplicates are detected by name and email and skipped.</p>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" @@click="downloadTemplate()"><i class="fas fa-download mr-1"></i>Download template</button>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="btn-group mb-3" role="group">
+                <button type="button" class="btn btn-sm" :class="state.type === t.key ? 'btn-primary' : 'btn-outline-primary'" v-for="t in types" :key="t.key" @@click="setType(t.key)">{{ t.label }}</button>
+            </div>
+            <div class="d-flex flex-wrap align-items-center" style="gap:12px">
+                <input type="file" accept=".csv,text/csv" class="form-control" style="max-width:360px" @@change="onFile($event)" />
+                <button class="btn btn-outline-primary" :disabled="!state.csv || state.busy" @@click="run(true)">Check file</button>
+                <button class="btn btn-primary" :disabled="!state.csv || state.busy || !state.checked" @@click="run(false)">Import</button>
+                <span class="text-muted small" v-if="state.fileName">{{ state.fileName }}</span>
+            </div>
+            <div class="small text-muted mt-2">Columns: {{ current.columns }}</div>
+        </div>
+    </div>
+
+    <div class="card" v-if="state.result">
+        <div class="card-header"><h5>{{ state.result.preview ? 'Check result (nothing saved yet)' : 'Import finished' }}</h5></div>
+        <div class="card-body">
+            <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+                <div class="kpi-card"><div class="kpi-label">Rows</div><div class="kpi-value">{{ state.result.totalRows }}</div></div>
+                <div class="kpi-card"><div class="kpi-label">{{ state.result.preview ? 'Will import' : 'Imported' }}</div><div class="kpi-value" style="color:var(--success)">{{ state.result.imported }}</div></div>
+                <div class="kpi-card"><div class="kpi-label">Skipped</div><div class="kpi-value" :style="{ color: state.result.skipped ? 'var(--danger)' : '' }">{{ state.result.skipped }}</div></div>
+            </div>
+            <div class="table-responsive" v-if="state.result.issues.length">
+                <table class="table table-sm">
+                    <thead><tr><th>Row</th><th>Name</th><th>Reason</th></tr></thead>
+                    <tbody><tr v-for="(i, n) in state.result.issues" :key="n"><td>{{ i.row }}</td><td>{{ i.name }}</td><td>{{ i.reason }}</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Imports/ImportCustomers.cshtml.js"></script>
+}

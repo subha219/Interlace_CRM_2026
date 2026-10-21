@@ -1,0 +1,35 @@
+@page
+@{
+    ViewData["Title"] = "How did we do?";
+}
+
+<div id="app" v-cloak>
+    <div class="auth-status" v-if="state.mode === 'loading'"><p class="auth-sub">Loading...</p></div>
+    <div class="auth-status" v-else-if="state.mode === 'invalid'">
+        <h1 class="auth-title">Link not valid</h1>
+        <p class="auth-sub">This survey link is not valid. Please use the link from your e-mail.</p>
+    </div>
+    <div class="auth-status" v-else-if="state.mode === 'done'">
+        <h1 class="auth-title">Thank you!</h1>
+        <p class="auth-sub">Your feedback has been recorded.</p>
+    </div>
+    <div v-else>
+        <div class="auth-status">
+            <h1 class="auth-title">How did we do?</h1>
+            <p class="auth-sub">Case {{ state.number }}: {{ state.title }}</p>
+        </div>
+        <form v-on:submit.prevent="submit">
+            <div class="d-flex justify-content-center gap-2 mb-3">
+                <button type="button" v-for="n in 5" :key="n" class="btn" :class="state.score === n ? 'btn-primary' : 'btn-outline-secondary'" @@click="state.score = n">{{ n }}</button>
+            </div>
+            <div class="d-flex justify-content-between small text-muted mb-3"><span>1 = Poor</span><span>5 = Excellent</span></div>
+            <textarea class="form-control mb-3" rows="3" maxlength="1000" placeholder="Anything we should know? (optional)" v-model="state.comment"></textarea>
+            <button type="submit" class="auth-btn" :disabled="!state.score || state.busy">{{ state.busy ? 'Please wait...' : 'Send feedback' }}</button>
+            <div class="text-danger small mt-2" v-if="state.error">{{ state.error }}</div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Accounts/Csat.cshtml.js"></script>
+}

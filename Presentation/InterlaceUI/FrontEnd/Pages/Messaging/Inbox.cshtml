@@ -1,0 +1,74 @@
+﻿@page
+@{
+    ViewData["Title"] = "WhatsApp & SMS";
+}
+
+<div id="app" v-cloak>
+    <div class="alert alert-warning py-2" v-if="state.configured && (!state.configured.WhatsApp || !state.configured.SMS)">
+        <span v-if="!state.configured.WhatsApp">WhatsApp is not set up. An administrator can add it under Settings &rarr; Connections.</span>
+        <span v-if="!state.configured.SMS"> SMS is not set up. An administrator can add the MSG91 key under Settings &rarr; Connections.</span>
+    </div>
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Conversations</span>
+                    <button class="btn btn-sm btn-primary" @@click="newChat">New</button>
+                </div>
+                <div class="list-group list-group-flush" style="max-height:65vh;overflow:auto">
+                    <div class="list-group-item text-muted" v-if="!state.list.length">No messages yet.</div>
+                    <a href="#" class="list-group-item list-group-item-action" v-for="c in state.list" :key="c.channel + c.address" :class="isOpen(c) ? 'active' : ''" @@click.prevent="open(c.channel, c.address)">
+                        <div class="d-flex justify-content-between"><strong>{{ c.name || '+' + c.address }}</strong><span class="badge" :class="c.channel === 'WhatsApp' ? 'bg-success' : 'bg-secondary'">{{ c.channel }}</span></div>
+                        <div class="small text-truncate">{{ c.lastDirection === 'In' ? '' : 'You: ' }}{{ c.lastText }}</div>
+                        <div class="small opacity-75">{{ when(c.lastAtUtc) }}</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card" v-if="state.draft">
+                <div class="card-header">New conversation</div>
+                <div class="card-body row g-2">
+                    <div class="col-md-4"><label class="form-label small mb-0">Channel</label><select class="form-select form-select-sm" v-model="state.draft.channel"><option>WhatsApp</option><option>SMS</option></select></div>
+                    <div class="col-md-5"><label class="form-label small mb-0">Phone (with country code)</label><input class="form-control form-control-sm" maxlength="20" v-model="state.draft.address" placeholder="+91 98765 43210" /></div>
+                    <div class="col-md-3 d-flex align-items-end"><button class="btn btn-sm btn-primary me-1" @@click="startChat">Open</button><button class="btn btn-sm btn-light" @@click="state.draft = null">Cancel</button></div>
+                </div>
+            </div>
+            <div class="card" v-if="state.thread">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><strong>{{ state.thread.name || '+' + state.thread.address }}</strong> <span class="text-muted small">+{{ state.thread.address }} · {{ state.thread.channel }}</span></span>
+                    <span>
+                        <span class="badge bg-danger" v-if="state.thread.optedOut">Opted out</span>
+                        <span class="badge bg-success" v-else-if="state.thread.channel === 'WhatsApp' && state.thread.windowOpen">24h window open</span>
+                        <span class="badge bg-secondary" v-else-if="state.thread.channel === 'WhatsApp'">Template needed</span>
+                    </span>
+                </div>
+                <div class="card-body" style="max-height:45vh;overflow:auto" ref="box">
+                    <div v-if="!state.thread.messages.length" class="text-muted">No messages yet.</div>
+                    <div v-for="m in state.thread.messages" :key="m.id" class="mb-2 d-flex" :class="m.direction === 'Out' ? 'justify-content-end' : ''">
+                        <div class="p-2 rounded" style="max-width:75%;white-space:pre-wrap" :class="m.direction === 'Out' ? 'bg-primary text-white' : 'bg-light border text-dark'">
+                            {{ m.body }}
+                            <div class="small opacity-75">{{ when(m.atUtc) }}<span v-if="m.direction === 'Out'"> · {{ m.status }}<span v-if="m.sentByName"> · {{ m.sentByName }}</span></span><span v-if="m.templateName"> · template</span></div>
+                            <div class="small text-warning" v-if="m.error">{{ m.error }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row g-2">
+                        <div class="col-md-5"><select class="form-select form-select-sm" v-model="state.templateId" @@change="pickTemplate"><option value="">{{ state.thread.channel === 'SMS' ? 'Choose a template' : 'Free text (24h window)' }}</option><option v-for="t in templates" :key="t.id" :value="t.id">{{ t.name }}</option></select></div>
+                        <div class="col-md-7 form-check pt-1 ps-5"><input class="form-check-input" type="checkbox" id="mk" v-model="state.marketing" /><label class="form-check-label small" for="mk">Marketing message (respects opt-out and consent)</label></div>
+                        <div class="col-12" v-if="tpl"><div class="small text-muted mb-1">{{ tpl.body }}</div>
+                            <div class="row g-1"><div class="col-md-4" v-for="v in vars" :key="v"><input class="form-control form-control-sm" :placeholder="v" maxlength="200" v-model="state.values[v]" /></div></div></div>
+                        <div class="col-12" v-else><textarea class="form-control form-control-sm" rows="2" maxlength="4000" placeholder="Write a message" v-model="state.text" :disabled="state.thread.channel === 'SMS'"></textarea></div>
+                        <div class="col-12 text-end"><button class="btn btn-sm btn-primary" :disabled="state.busy" @@click="send">Send</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-muted" v-if="!state.thread && !state.draft">Pick a conversation or start a new one.</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Messaging/Inbox.cshtml.js"></script>
+}

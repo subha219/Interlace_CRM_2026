@@ -1,0 +1,55 @@
+﻿@page
+@{
+    ViewData["Title"] = "Connections";
+}
+
+<div id="app" v-cloak>
+    <div class="alert alert-info small">
+        Keys for the services this CRM talks to. Each company enters its own here. Secrets are stored encrypted and are never shown again; leave a secret box empty to keep the saved one.
+        A value saved here wins over the server's configuration file. Changes apply within about 30 seconds on every server.
+    </div>
+
+    <div class="card mb-3" v-for="g in state.groups" :key="g.id">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>{{ g.title }}</strong>
+            <span class="badge" :class="ready(g) ? 'bg-success' : 'bg-secondary'">{{ ready(g) ? 'Set up' : 'Not set up' }}</span>
+        </div>
+        <div class="card-body">
+            <p class="small text-muted">{{ g.help }}</p>
+            <div class="row g-3">
+                <div class="col-md-6" v-for="f in g.fields" :key="f.key">
+                    <label class="form-label small mb-1">{{ f.label }}
+                        <span class="badge bg-light text-dark border ms-1" v-if="f.source === 'saved'">saved here</span>
+                        <span class="badge bg-light text-dark border ms-1" v-else-if="f.source === 'server'">from server file</span>
+                    </label>
+                    <select v-if="f.kind === 'bool'" class="form-select form-select-sm" v-model="state.edit[f.key]">
+                        <option :value="undefined">{{ f.hasValue ? 'Keep (' + (f.value === 'true' ? 'on' : 'off') + ')' : 'Keep (off)' }}</option>
+                        <option value="true">On</option><option value="false">Off</option>
+                    </select>
+                    <input v-else :type="f.secret ? 'password' : 'text'" class="form-control form-control-sm" maxlength="500" autocomplete="off"
+                           :placeholder="f.secret ? (f.hasValue ? 'Saved. Type to replace.' : 'Not set') : (f.hasValue ? '' : 'Not set')"
+                           v-model="state.edit[f.key]" :disabled="state.clear[f.key]" />
+                    <div class="form-text" v-if="f.hint">{{ f.hint }}</div>
+                    <div class="form-check mt-1" v-if="f.source === 'saved' && f.kind !== 'bool'">
+                        <input class="form-check-input" type="checkbox" :id="'c-' + f.key" v-model="state.clear[f.key]" />
+                        <label class="form-check-label small" :for="'c-' + f.key">Remove the saved value</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3 small" v-if="urls(g).length">
+                <div class="fw-semibold mb-1">Addresses to register with the provider</div>
+                <div v-for="u in urls(g)" :key="u.label" class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                    <span class="text-muted" style="min-width:150px">{{ u.label }}</span><code class="text-break">{{ u.url }}</code>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-sm btn-primary" :disabled="state.busy || !dirty(g)" @@click="save(g)">Save {{ g.title }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Integrations/Connections.cshtml.js"></script>
+}

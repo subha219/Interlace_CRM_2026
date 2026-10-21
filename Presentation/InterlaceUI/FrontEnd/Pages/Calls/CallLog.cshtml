@@ -1,0 +1,33 @@
+﻿@page
+@{
+    ViewData["Title"] = "Calls";
+}
+
+<div id="app" v-cloak>
+    <div class="alert alert-warning py-2" v-if="state.loaded && !state.configured">Calling is not set up. An administrator can add the Exotel details under Settings &rarr; Connections.</div>
+    <div class="card mb-3"><div class="card-body"><div class="row g-2 align-items-end">
+        <div class="col-md-4"><label class="form-label small mb-0">Customer number</label><input class="form-control form-control-sm" maxlength="20" placeholder="+91 98765 43210" v-model="state.to" /></div>
+        <div class="col-md-4"><label class="form-label small mb-0">Your number (rung first)</label><input class="form-control form-control-sm" maxlength="20" v-model="state.agent" /></div>
+        <div class="col-md-4"><button class="btn btn-sm btn-success" :disabled="state.busy || !state.configured" @@click="call">Call</button> <span class="small text-muted">Exotel rings you first, then the customer.</span></div>
+    </div></div></div>
+
+    <div class="card"><div class="table-responsive"><table class="table align-middle mb-0">
+        <thead><tr><th>When</th><th>Who</th><th>Direction</th><th>Status</th><th>Length</th><th>By</th><th>Notes</th></tr></thead>
+        <tbody>
+            <tr v-if="!state.rows.length"><td colspan="7" class="text-muted">No calls yet.</td></tr>
+            <tr v-for="c in state.rows" :key="c.id">
+                <td class="text-nowrap">{{ when(c.atUtc) }}</td>
+                <td>{{ c.relatedName || ('+' + c.customerNumber) }}<div class="small text-muted" v-if="c.relatedName">+{{ c.customerNumber }}</div></td>
+                <td>{{ c.direction === 'In' ? 'Incoming' : 'Outgoing' }}</td>
+                <td><span class="badge" :class="badge(c.status)">{{ c.status }}</span><div class="small text-danger" v-if="c.error">{{ c.error }}</div></td>
+                <td>{{ c.duration }}<div v-if="c.recordingUrl"><a :href="c.recordingUrl" target="_blank" rel="noopener noreferrer" class="small">Recording</a></div></td>
+                <td>{{ c.userName }}</td>
+                <td style="min-width:220px"><div class="small">{{ c.notes }}</div><button class="btn btn-sm btn-link p-0" @@click="note(c)">{{ c.notes ? 'Edit note' : 'Add note' }}</button></td>
+            </tr>
+        </tbody>
+    </table></div></div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Calls/CallLog.cshtml.js"></script>
+}

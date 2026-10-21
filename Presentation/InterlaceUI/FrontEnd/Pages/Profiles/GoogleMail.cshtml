@@ -1,0 +1,38 @@
+﻿@page
+@{
+    ViewData["Title"] = "Gmail Sync";
+}
+
+<div id="app" v-cloak>
+    <div class="alert alert-info small">
+        Mail you send to or receive from your customers and leads is added to their record as an <strong>Email</strong> activity (shown under "Activities &amp; files"). Only messages with people already in the CRM are kept, and only the subject and a short preview, never the full message or attachments. Access is read-only. The last 30 days are picked up first, then new mail every 10 minutes.
+    </div>
+    <div class="alert alert-success py-2" v-if="state.flash === 'connected'">Connected to Gmail.</div>
+    <div class="alert alert-danger py-2" v-if="state.flash && state.flash !== 'connected'">{{ flashText }}</div>
+
+    <div class="card" v-if="state.s">
+        <div class="card-body">
+            <div v-if="!state.s.configured" class="alert alert-warning small mb-0">
+                Google is not connected yet. An administrator can add the client id and secret under <strong>Settings &rarr; Connections</strong> (create an OAuth client of type Web application in Google Cloud, enable the Gmail API and register this redirect address).
+                <div class="mt-2"><code>{{ state.s.redirectUri }}</code></div>
+            </div>
+            <template v-else>
+                <div v-if="state.s.connected">
+                    <p class="mb-1"><span class="badge bg-success">Connected</span> {{ state.s.email }}</p>
+                    <p class="small text-muted mb-1" v-if="state.s.lastSyncUtc">Last sync {{ (state.s.lastSyncUtc || '').replace('T', ' ').substring(0, 16) }} UTC: {{ state.s.lastStatus }}</p>
+                    <p class="small text-muted mb-2">{{ state.s.savedCount }} e-mail(s) saved so far.</p>
+                    <button class="btn btn-primary btn-sm" :disabled="state.busy" @@click="syncNow">Sync now</button>
+                    <button class="btn btn-outline-danger btn-sm" @@click="disconnect">Disconnect</button>
+                </div>
+                <div v-else>
+                    <p class="text-warning small" v-if="state.s.needsReconnect">The connection stopped working: {{ state.s.lastStatus }}</p>
+                    <button class="btn btn-primary" :disabled="state.busy" @@click="connect">Connect Gmail</button>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Profiles/GoogleMail.cshtml.js"></script>
+}

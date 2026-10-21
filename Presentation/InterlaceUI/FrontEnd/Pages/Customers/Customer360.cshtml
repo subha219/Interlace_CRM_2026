@@ -1,0 +1,117 @@
+﻿@page
+@{
+    ViewData["HideTitle"] = true;
+    ViewData["Title"] = "Customer 360";
+}
+
+<div id="app" v-cloak>
+    <div class="page-head">
+        <div>
+            <h1>Customer 360</h1>
+            <p>Everything about one customer: money, documents, support and history.</p>
+        </div>
+        <div style="min-width:300px"><input ref="selectRef" /></div>
+    </div>
+
+    <div v-if="state.error" class="card"><div class="card-body empty-state"><i class="fas fa-triangle-exclamation"></i>{{ state.error }}</div></div>
+    <div v-if="!state.data && !state.loading && !state.error" class="card"><div class="card-body empty-state"><i class="fas fa-user-magnifying-glass"></i>Choose a customer above to see the full picture.</div></div>
+    <div v-if="state.loading" class="skeleton" style="height:140px"></div>
+
+    <template v-if="state.data && !state.loading">
+        <div class="card mb-3">
+            <div class="card-body d-flex flex-wrap justify-content-between" style="gap:18px">
+                <div>
+                    <h3 class="mb-1">{{ state.data.name }} <span class="pill ml-2" :class="healthPill(state.data.healthLabel)">{{ state.data.healthLabel }}</span></h3>
+                    <div class="text-muted">{{ state.data.number }} <span v-if="state.data.groupName">&middot; {{ state.data.groupName }}</span> <span v-if="state.data.categoryName">&middot; {{ state.data.categoryName }}</span></div>
+                    <div class="mt-2 small">
+                        <span v-if="state.data.email" class="mr-3"><i class="far fa-envelope mr-1"></i>{{ state.data.email }}</span>
+                        <span v-if="state.data.phone" class="mr-3"><i class="fas fa-phone mr-1"></i>{{ state.data.phone }}</span>
+                        <span v-if="state.data.website" class="mr-3"><i class="fas fa-globe mr-1"></i>{{ state.data.website }}</span>
+                    </div>
+                    <div class="small text-muted mt-1" v-if="state.data.address"><i class="fas fa-location-dot mr-1"></i>{{ state.data.address }}</div>
+                </div>
+                <div style="max-width:460px">
+                    <div class="kpi-label mb-1">Why this health rating</div>
+                    <ul class="mb-0 pl-3 small">
+                        <li v-for="(r, i) in state.data.healthReasons" :key="i">{{ r }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card"><div class="kpi-label">Lifetime revenue</div><div class="kpi-value">{{ money(state.data.lifetimeRevenue) }}</div><div class="kpi-sub">Payments received</div></div>
+            <div class="kpi-card"><div class="kpi-label">Total billed</div><div class="kpi-value">{{ money(state.data.totalBilled) }}</div><div class="kpi-sub">{{ state.data.invoiceCount }} invoice(s)</div></div>
+            <div class="kpi-card" :class="{ alert: state.data.overdueBalance > 0 }"><div class="kpi-label">Open balance</div><div class="kpi-value">{{ money(state.data.openBalance) }}</div><div class="kpi-sub">{{ money(state.data.overdueBalance) }} overdue</div></div>
+            <div class="kpi-card"><div class="kpi-label">Open cases</div><div class="kpi-value">{{ state.data.openCaseCount }}</div><div class="kpi-sub">Support</div></div>
+            <div class="kpi-card"><div class="kpi-label">Quotes / Orders</div><div class="kpi-value">{{ state.data.quotationCount }} / {{ state.data.orderCount }}</div><div class="kpi-sub">&nbsp;</div></div>
+            <div class="kpi-card"><div class="kpi-label">Last interaction</div><div class="kpi-value" style="font-size:1.15rem">{{ day(state.data.lastInteraction) || 'None' }}</div><div class="kpi-sub">&nbsp;</div></div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-5 mb-3">
+                <div class="card h-100">
+                    <div class="card-header"><h5>Timeline</h5></div>
+                    <div class="card-body" style="max-height:560px;overflow-y:auto">
+                        <div v-if="!state.data.timeline.length" class="empty-state"><i class="fas fa-clock-rotate-left"></i>No history yet.</div>
+                        <ul class="todo-list">
+                            <li v-for="(t, i) in state.data.timeline" :key="i">
+                                <a :href="t.url" class="todo-item">
+                                    <span class="todo-icon low"><i class="fas" :class="tIcon(t.type)"></i></span>
+                                    <span>
+                                        <div class="todo-title">{{ t.title }}</div>
+                                        <div class="todo-detail">{{ day(t.date) }} &middot; {{ t.detail }}</div>
+                                    </span>
+                                    <span class="todo-amount" v-if="t.amount">{{ money(t.amount) }}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <ul class="nav nav-pills">
+                            <li class="nav-item" v-for="t in tabs" :key="t.key">
+                                <a href="#" class="nav-link py-1" :class="{ active: state.tab === t.key }" @@click.prevent="state.tab = t.key">{{ t.label }} <span class="badge badge-light">{{ count(t.key) }}</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0" v-if="state.tab !== 'cases'">
+                                <thead><tr><th>Number</th><th>Date</th><th v-if="state.tab !== 'orders'">{{ state.tab === 'quotations' ? 'Valid until' : 'Due' }}</th><th>Status</th><th class="text-right">Amount</th><th class="text-right" v-if="state.tab === 'invoices'">Balance</th><th v-if="state.tab === 'invoices'"></th></tr></thead>
+                                <tbody>
+                                    <tr v-for="d in docs" :key="d.id">
+                                        <td>{{ d.number }}</td><td>{{ day(d.date) }}</td>
+                                        <td v-if="state.tab !== 'orders'">{{ day(d.dueDate) }}</td>
+                                        <td><span class="pill pill-neutral">{{ d.status }}</span></td>
+                                        <td class="text-right">{{ money(d.amount) }}</td>
+                                        <td class="text-right" v-if="state.tab === 'invoices'">{{ money(d.balance) }}</td>
+                                        <td v-if="state.tab === 'invoices'"><button class="btn btn-outline-primary btn-sm py-0" v-if="d.balance > 0" @@click="draft(d.number)">Draft reminder</button></td>
+                                    </tr>
+                                    <tr v-if="!docs.length"><td colspan="7" class="text-center text-muted py-4">Nothing here yet.</td></tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-sm mb-0" v-else>
+                                <thead><tr><th>Number</th><th>Title</th><th>Priority</th><th>Status</th><th>SLA due</th></tr></thead>
+                                <tbody>
+                                    <tr v-for="c in state.data.cases" :key="c.id">
+                                        <td>{{ c.number }}</td><td>{{ c.title }}</td><td>{{ c.priority }}</td><td><span class="pill pill-neutral">{{ c.status }}</span></td>
+                                        <td><span :class="c.slaBreached ? 'pill pill-high' : ''">{{ day(c.dueDate) }}</span></td>
+                                    </tr>
+                                    <tr v-if="!state.data.cases.length"><td colspan="5" class="text-center text-muted py-4">No support cases.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Customers/Customer360.cshtml.js"></script>
+}

@@ -1,0 +1,36 @@
+﻿using Application.Features.BulkManager;
+using InterlaceUI.BackEnd.Common.Base;
+using InterlaceUI.BackEnd.Common.Models;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InterlaceUI.BackEnd.Controllers;
+
+[Route("api/[controller]")]
+public class BulkController : BaseApiController
+{
+    public BulkController(ISender sender) : base(sender)
+    {
+    }
+
+    private string CurrentUserId =>
+        User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+        ?? User.FindFirst("sub")?.Value
+        ?? User.FindFirst("nameid")?.Value
+        ?? throw new UnauthorizedAccessException("User id not found in token.");
+
+    private bool HasRole(string role) =>
+        User.IsInRole(role) || User.Claims.Any(c => (c.Type == "role" || c.Type == System.Security.Claims.ClaimTypes.Role) && c.Value == role);
+
+    [Authorize]
+    [HttpPost("Update")]
+    public async Task<ActionResult<ApiSuccessResult<BulkUpdateResult>>> UpdateAsync(BulkUpdateRequest request, CancellationToken cancellationToken)
+    {
+        if (!HasRole(request.Entity == "Lead" ? "Leads" : "Customers")) return StatusCode(StatusCodes.Status403Forbidden);
+
+        request.UserId = CurrentUserId;
+        var response = await _sender.Send(request, cancellationToken);
+        return Ok(new ApiSuccessResult<BulkUpdateResult> { Code = StatusCodes.Status200OK, Message = $"Success executing {nameof(UpdateAsync)}", Content = response });
+    }
+}

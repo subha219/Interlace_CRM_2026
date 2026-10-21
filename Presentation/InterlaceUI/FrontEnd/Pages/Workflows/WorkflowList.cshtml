@@ -1,0 +1,114 @@
+﻿@page
+@{
+    ViewData["Title"] = "Workflow Rules";
+}
+
+<div id="app" v-cloak>
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><a class="nav-link" :class="{ active: state.tab === 'rules' }" href="#" @@click.prevent="state.tab = 'rules'">Rules</a></li>
+        <li class="nav-item"><a class="nav-link" :class="{ active: state.tab === 'runs' }" href="#" @@click.prevent="openRuns">Run history</a></li>
+    </ul>
+
+    <div v-if="state.tab === 'rules'">
+        <div class="alert alert-info small">A rule waits for an event (for example a new lead), checks its conditions and then runs its actions automatically. Actions done by a rule never trigger other rules. In texts, use placeholders such as <code>{title}</code>, <code>{company}</code>, <code>{amount}</code>, <code>{stage}</code>, <code>{number}</code>.</div>
+        <div class="d-flex mb-2"><span class="flex-grow-1"></span><button class="btn btn-sm btn-primary" @@click="add">New rule</button></div>
+        <div class="card mb-3"><div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Name</th><th>When</th><th>If</th><th>Then</th><th>Runs</th><th>Active</th><th></th></tr></thead>
+                <tbody>
+                    <tr v-if="!state.rules.length"><td colspan="7" class="text-muted">No rules yet.</td></tr>
+                    <tr v-for="r in state.rules" :key="r.id" :class="{ 'text-muted': !r.isActive }">
+                        <td>{{ r.name }}</td><td class="small">{{ eventLabel(r.triggerEvent) }}</td>
+                        <td class="small">{{ summaryIf(r) }}</td><td class="small">{{ summaryThen(r) }}</td>
+                        <td class="small">{{ r.runCount }}<span v-if="r.lastRunAtUtc" class="text-muted"> (last {{ when(r.lastRunAtUtc) }})</span></td>
+                        <td>{{ r.isActive ? 'Yes' : 'No' }}</td>
+                        <td class="text-end text-nowrap">
+                            <button class="btn btn-sm btn-outline-secondary" @@click="edit(r)">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" @@click="remove(r)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div></div>
+
+        <div class="card" v-if="state.form">
+            <div class="card-header"><h6 class="mb-0">{{ state.form.id ? 'Edit rule' : 'New rule' }}</h6></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-5"><label class="form-label">Name</label><input class="form-control" maxlength="100" v-model="state.form.name" /></div>
+                    <div class="col-md-5"><label class="form-label">When</label>
+                        <select class="form-select" v-model="state.form.triggerEvent"><option v-for="e in state.events" :key="e" :value="e">{{ eventLabel(e) }}</option></select></div>
+                    <div class="col-md-2 d-flex align-items-end"><label><input type="checkbox" v-model="state.form.isActive" /> Active</label></div>
+
+                    <div class="col-12">
+                        <label class="form-label">Only if (all must be true)</label>
+                        <div class="d-flex flex-wrap gap-2 mb-2" v-for="(c, i) in state.form.conditions" :key="'c' + i">
+                            <select class="form-select form-select-sm" style="width:auto" v-model="c.field"><option v-for="f in fields" :key="f" :value="f">{{ f }}</option></select>
+                            <select class="form-select form-select-sm" style="width:auto" v-model="c.op"><option v-for="o in operators" :key="o.v" :value="o.v">{{ o.t }}</option></select>
+                            <input class="form-control form-control-sm" style="max-width:200px" v-model="c.value" v-if="c.op !== 'is_empty' && c.op !== 'is_not_empty'" />
+                            <button class="btn btn-sm btn-outline-danger" @@click="state.form.conditions.splice(i, 1)">Remove</button>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary" @@click="state.form.conditions.push({ field: fields[0], op: 'equals', value: '' })">Add condition</button>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Then do</label>
+                        <div class="border rounded p-2 mb-2" v-for="(a, i) in state.form.actions" :key="'a' + i">
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <select class="form-select form-select-sm" style="width:auto" v-model="a.type">
+                                    <option value="create_activity">Create an activity</option><option value="notify">Notify someone</option>
+                                    <option value="set_owner">Change the owner</option><option value="add_tag" v-if="hasTags">Add a tag</option><option value="send_email">Send an e-mail</option>
+                                </select>
+                                <template v-if="a.type === 'create_activity'">
+                                    <select class="form-select form-select-sm" style="width:auto" v-model="a.activityType"><option>Task</option><option>Call</option><option>Meeting</option><option>Email</option><option>Note</option></select>
+                                    <input class="form-control form-control-sm" style="min-width:240px;flex:1" placeholder="Subject, e.g. Call {company}" v-model="a.subject" />
+                                    <label class="small mb-0">due in</label><input type="number" min="0" max="365" class="form-control form-control-sm" style="width:80px" v-model.number="a.dueInDays" /><span class="small">day(s)</span>
+                                    <select class="form-select form-select-sm" style="width:auto" v-model="a.assignTo"><option value="owner">Assign to the owner</option><option v-for="u in state.users" :key="u.id" :value="u.id">{{ u.name }}</option></select>
+                                </template>
+                                <template v-if="a.type === 'notify'">
+                                    <select class="form-select form-select-sm" style="width:auto" v-model="a.to"><option value="owner">The owner</option><option v-for="u in state.users" :key="u.id" :value="u.id">{{ u.name }}</option></select>
+                                    <input class="form-control form-control-sm" style="max-width:200px" placeholder="Title" v-model="a.title" />
+                                    <input class="form-control form-control-sm" style="min-width:240px;flex:1" placeholder="Message, e.g. New lead {title}" v-model="a.message" />
+                                </template>
+                                <template v-if="a.type === 'set_owner'">
+                                    <select class="form-select form-select-sm" style="width:auto" v-model="a.userId"><option value="">Choose a person</option><option v-for="u in state.users" :key="u.id" :value="u.id">{{ u.name }}</option></select>
+                                </template>
+                                <template v-if="a.type === 'add_tag'"><input class="form-control form-control-sm" style="max-width:220px" placeholder="Tag" v-model="a.tag" /></template>
+                                <template v-if="a.type === 'send_email'">
+                                    <input class="form-control form-control-sm" style="max-width:280px" placeholder="Subject" v-model="a.subject" />
+                                    <input class="form-control form-control-sm" style="min-width:260px;flex:1" placeholder="Body, e.g. Hi {company}, thanks for your interest." v-model="a.body" />
+                                    <label class="small mb-0"><input type="checkbox" v-model="a.marketing" /> marketing (needs consent)</label>
+                                </template>
+                                <button class="btn btn-sm btn-outline-danger ms-auto" @@click="state.form.actions.splice(i, 1)">Remove</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary" @@click="state.form.actions.push(blankAction())">Add action</button>
+                    </div>
+
+                    <div class="col-12"><button class="btn btn-primary" @@click="save">Save rule</button> <button class="btn btn-light" @@click="state.form = null">Cancel</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="state.tab === 'runs'">
+        <div class="d-flex mb-2"><span class="flex-grow-1 text-muted small">The last 100 runs.</span><button class="btn btn-sm btn-outline-primary" @@click="loadRuns">Refresh</button></div>
+        <div class="card"><div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>When</th><th>Rule</th><th>Event</th><th>Record</th><th>Result</th><th>What happened</th></tr></thead>
+                <tbody>
+                    <tr v-if="!state.runs.length"><td colspan="6" class="text-muted">No runs yet.</td></tr>
+                    <tr v-for="r in state.runs" :key="r.id">
+                        <td class="small">{{ when(r.runAtUtc) }}</td><td>{{ r.ruleName }}</td><td class="small">{{ r.eventName }}</td><td>{{ r.recordLabel }}</td>
+                        <td><span class="badge" :class="r.success ? 'bg-success' : 'bg-danger'">{{ r.success ? 'OK' : 'Problem' }}</span></td>
+                        <td class="small text-muted">{{ r.detail }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div></div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Workflows/WorkflowList.cshtml.js"></script>
+}

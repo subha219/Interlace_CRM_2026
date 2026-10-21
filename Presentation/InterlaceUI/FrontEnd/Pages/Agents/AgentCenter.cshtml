@@ -1,0 +1,99 @@
+﻿@page
+@{
+    ViewData["Title"] = "AI Agents";
+}
+
+<div id="app" v-cloak>
+    <div class="alert alert-info small">
+        Agents look for work and <strong>suggest</strong> it. Nothing changes until a person approves a suggestion below, and approving needs the role for that kind of change.
+        <span v-if="!state.modelConfigured"> No AI model is set up, so the triage agent uses simple keyword rules.</span>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-6 col-xl-3" v-for="a in state.agents" :key="a.key">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="mb-1">{{ a.name }}</h6>
+                        <span class="badge bg-secondary" v-if="a.usesAi">AI</span>
+                    </div>
+                    <p class="small text-muted mb-2">{{ a.description }}</p>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" :id="'sw-' + a.key" v-model="a.enabled" @@change="saveSetting(a)" />
+                        <label class="form-check-label small" :for="'sw-' + a.key">{{ a.enabled ? 'On' : 'Off' }}</label>
+                    </div>
+                    <div class="form-check form-switch mb-2" v-if="a.enabled">
+                        <input class="form-check-input" type="checkbox" :id="'auto-' + a.key" v-model="a.autoRun" @@change="saveSetting(a)" />
+                        <label class="form-check-label small" :for="'auto-' + a.key">Run by itself once a day</label>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <label class="small text-muted mb-0">Max per run</label>
+                        <input type="number" min="1" max="100" class="form-control form-control-sm" style="width:80px" v-model.number="a.maxPerRun" @@change="saveSetting(a)" />
+                    </div>
+                    <button class="btn btn-sm btn-primary" :disabled="!a.enabled || state.busy" @@click="run(a)">Run now</button>
+                    <button class="btn btn-sm btn-outline-secondary" @@click="filterAgent(a.key)">{{ a.pending }} waiting</button>
+                    <div class="small text-muted mt-2" v-if="a.lastRunAtUtc">Last run {{ when(a.lastRunAtUtc) }}: {{ a.lastProposed }} suggestion(s)<span class="text-danger" v-if="a.lastError"> · failed ({{ a.lastError }})</span></div>
+                    <div class="small text-muted mt-2" v-else>Never run.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex flex-wrap gap-2 align-items-center">
+            <div class="btn-group btn-group-sm">
+                <button v-for="s in statuses" :key="s" class="btn" :class="state.status === s ? 'btn-primary' : 'btn-outline-primary'" @@click="setStatus(s)">{{ s }}</button>
+            </div>
+            <span class="small text-muted" v-if="state.agentKey">Showing one agent · <a href="#" @@click.prevent="filterAgent('')">show all</a></span>
+            <span class="ms-auto"></span>
+            <template v-if="state.status === 'Pending'">
+                <button class="btn btn-sm btn-success" :disabled="!selected.length || state.busy" @@click="bulk(true)">Approve selected ({{ selected.length }})</button>
+                <button class="btn btn-sm btn-outline-danger" :disabled="!selected.length || state.busy" @@click="bulk(false)">Reject selected</button>
+            </template>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr>
+                    <th style="width:34px"><input type="checkbox" v-if="state.status === 'Pending'" :checked="allChecked" @@change="toggleAll($event.target.checked)" /></th>
+                    <th>Record</th><th>Suggestion</th><th>Why</th><th v-if="state.status === 'Pending'">Due / priority</th><th v-else>Outcome</th><th></th>
+                </tr></thead>
+                <tbody>
+                    <tr v-if="!state.proposals.length"><td colspan="6" class="text-center text-muted py-4">{{ state.status === 'Pending' ? 'Nothing waiting. Switch an agent on and press Run now.' : 'Nothing here.' }}</td></tr>
+                    <tr v-for="p in state.proposals" :key="p.id">
+                        <td><input type="checkbox" v-if="state.status === 'Pending'" v-model="state.picked[p.id]" /></td>
+                        <td><a :href="link(p)">{{ p.relatedName }}</a><div class="small text-muted">{{ p.relatedType }} · {{ agentName(p.agentKey) }}</div></td>
+                        <td style="min-width:220px">
+                            <input v-if="p.kind === 'Task' && state.status === 'Pending'" class="form-control form-control-sm" maxlength="200" v-model="p.title" />
+                            <span v-else>{{ p.title }}</span>
+                            <span class="badge bg-light text-dark border ms-1">{{ p.source === 'ai' ? 'AI' : 'rules' }}</span>
+                            <div class="mt-1" v-if="p.draft != null">
+                                <label class="small text-muted mb-0">Message to send (nothing is sent automatically; it is saved on the task)</label>
+                                <textarea v-if="state.status === 'Pending'" class="form-control form-control-sm" rows="4" maxlength="600" v-model="p.draft"></textarea>
+                                <div v-else class="small text-muted" style="white-space:pre-wrap">{{ p.draft }}</div>
+                            </div>
+                        </td>
+                        <td class="small" style="max-width:320px">{{ p.reason }}</td>
+                        <td v-if="state.status === 'Pending'" style="min-width:190px">
+                            <div class="d-flex gap-1" v-if="p.kind === 'Task'">
+                                <input type="number" min="0" max="365" class="form-control form-control-sm" style="width:70px" v-model.number="p.dueInDays" title="Due in days" />
+                                <select class="form-select form-select-sm" style="width:auto" v-model="p.priority"><option>Low</option><option>Normal</option><option>High</option></select>
+                            </div>
+                            <span class="small text-muted" v-else>Needs the {{ p.requiredRole }} role</span>
+                        </td>
+                        <td v-else class="small">{{ p.result }}<div class="text-muted">{{ p.decidedByName }} {{ when(p.decidedAtUtc) }}</div></td>
+                        <td class="text-nowrap">
+                            <template v-if="state.status === 'Pending'">
+                                <button class="btn btn-sm btn-success" :disabled="state.busy" @@click="decide(p, true)">Approve</button>
+                                <button class="btn btn-sm btn-outline-danger" :disabled="state.busy" @@click="decide(p, false)">Reject</button>
+                            </template>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Agents/AgentCenter.cshtml.js"></script>
+}

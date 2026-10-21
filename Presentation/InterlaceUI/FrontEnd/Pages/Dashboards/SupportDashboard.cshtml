@@ -1,0 +1,44 @@
+@page
+@{
+    ViewData["Title"] = "Support";
+}
+
+<div id="app" v-cloak>
+    <div class="d-flex align-items-center mb-3">
+        <p class="text-muted mb-0 flex-grow-1">Open workload, SLA performance and customer satisfaction.</p>
+        <button class="btn btn-sm btn-outline-primary" @@click="load" :disabled="state.loading">Refresh</button>
+    </div>
+    <div v-if="state.loading" class="text-muted">Loading...</div>
+    <template v-else-if="state.d">
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-lg-3" v-for="k in kpis" :key="k.label">
+                <div class="card h-100"><div class="card-body">
+                    <div class="small text-muted">{{ k.label }}</div>
+                    <div :class="k.bad ? 'text-danger' : ''" style="font-size:1.8rem;font-weight:600;line-height:1.2">{{ k.value }}</div>
+                    <div class="small text-muted">{{ k.sub }}</div>
+                </div></div>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <div class="card h-100"><div class="card-header"><h6 class="mb-0">Open by priority</h6></div>
+                    <ul class="list-group list-group-flush"><li class="list-group-item d-flex justify-content-between" v-for="i in state.d.byPriority" :key="i.label"><span>{{ i.label }}</span><strong>{{ i.count }}</strong></li></ul></div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100"><div class="card-header"><h6 class="mb-0">Open by status</h6></div>
+                    <ul class="list-group list-group-flush"><li class="list-group-item d-flex justify-content-between" v-for="i in state.d.byStatus" :key="i.label"><span>{{ i.label }}</span><strong>{{ i.count }}</strong></li></ul></div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100"><div class="card-header"><h6 class="mb-0">Workload per agent</h6></div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item text-muted" v-if="!state.d.agents.length">No open cases.</li>
+                        <li class="list-group-item d-flex justify-content-between" v-for="a in state.d.agents" :key="a.userId || 'none'"><span>{{ a.name }}</span><span><strong>{{ a.open }}</strong> open<span class="text-danger" v-if="a.breached"> · {{ a.breached }} late</span></span></li>
+                    </ul></div>
+            </div>
+        </div>
+    </template>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Dashboards/SupportDashboard.cshtml.js"></script>
+}

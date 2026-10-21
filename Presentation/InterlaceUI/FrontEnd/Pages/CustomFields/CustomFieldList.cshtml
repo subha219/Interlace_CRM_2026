@@ -1,0 +1,59 @@
+﻿@page
+@{
+    ViewData["Title"] = "Custom Fields";
+}
+
+<div id="app" v-cloak>
+    <div class="alert alert-info small">Add your own fields to leads, customers and support cases. After saving, select a record in its list and use <strong>Custom fields...</strong> above the grid to fill them in. A field's type cannot be changed once created; deactivate it instead.</div>
+
+    <div class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+            <h6 class="mb-0 flex-grow-1">Fields</h6>
+            <select class="form-select form-select-sm" style="width:auto" v-model="state.filter">
+                <option value="">All records</option><option>Lead</option><option>Customer</option><option>SupportCase</option>
+            </select>
+            <button class="btn btn-sm btn-primary" @@click="add">New field</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Used on</th><th>Label</th><th>Type</th><th>Choices</th><th>Required</th><th>Active</th><th>Order</th><th></th></tr></thead>
+                <tbody>
+                    <tr v-if="!shown.length"><td colspan="8" class="text-muted">No custom fields yet.</td></tr>
+                    <tr v-for="f in shown" :key="f.id" :class="{ 'text-muted': !f.isActive }">
+                        <td>{{ f.entity }}</td><td>{{ f.label }}</td><td>{{ f.fieldType }}</td>
+                        <td class="small">{{ f.options.join(', ') }}</td>
+                        <td>{{ f.isRequired ? 'Yes' : '' }}</td><td>{{ f.isActive ? 'Yes' : 'No' }}</td><td>{{ f.sortOrder }}</td>
+                        <td class="text-end text-nowrap">
+                            <button class="btn btn-sm btn-outline-secondary" @@click="edit(f)">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" @@click="remove(f)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" v-if="state.form">
+        <div class="card-header"><h6 class="mb-0">{{ state.form.id ? 'Edit field' : 'New field' }}</h6></div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3"><label class="form-label">Used on</label>
+                    <select class="form-select" v-model="state.form.entity" :disabled="!!state.form.id"><option>Lead</option><option>Customer</option><option>SupportCase</option></select></div>
+                <div class="col-md-4"><label class="form-label">Label</label><input class="form-control" maxlength="100" v-model="state.form.label" /></div>
+                <div class="col-md-3"><label class="form-label">Type</label>
+                    <select class="form-select" v-model="state.form.fieldType" :disabled="!!state.form.id"><option>Text</option><option>Number</option><option>Date</option><option>Boolean</option><option>Picklist</option></select></div>
+                <div class="col-md-2"><label class="form-label">Order</label><input type="number" class="form-control" v-model.number="state.form.sortOrder" /></div>
+                <div class="col-12" v-if="state.form.fieldType === 'Picklist'"><label class="form-label">Choices (one per line)</label><textarea class="form-control" rows="4" v-model="state.form.options"></textarea></div>
+                <div class="col-12 d-flex gap-4">
+                    <label><input type="checkbox" v-model="state.form.isRequired" /> Required</label>
+                    <label><input type="checkbox" v-model="state.form.isActive" /> Active</label>
+                </div>
+                <div class="col-12"><button class="btn btn-primary" @@click="save">Save</button> <button class="btn btn-light" @@click="state.form = null">Cancel</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/CustomFields/CustomFieldList.cshtml.js"></script>
+}

@@ -1,0 +1,83 @@
+﻿@page
+@{
+    ViewData["Title"] = "Sales Pipeline";
+}
+
+<style>
+    .kanban-wrap { display: flex; gap: .75rem; overflow-x: auto; padding-bottom: 1rem; align-items: flex-start; }
+    .kanban-col { flex: 0 0 270px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; max-height: calc(100vh - 230px); }
+    .kanban-col.drag-over { outline: 2px dashed #009CFF; }
+    .kanban-col-header { padding: .6rem .75rem; border-bottom: 1px solid var(--border); }
+    .kanban-col-body { padding: .5rem; overflow-y: auto; min-height: 80px; flex: 1; }
+    .kanban-card { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 10px; padding: .55rem .65rem; margin-bottom: .5rem; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .kanban-card.dragging { opacity: .4; }
+    .kanban-card.stale { border-left-color: #ef4444; }
+    .kanban-card.hot { border-left-color: #22c55e; }
+    .kanban-col.col-won .kanban-col-header { background: rgba(40,167,69,.15); }
+    .kanban-col.col-lost .kanban-col-header { background: rgba(233,70,73,.15); }
+    .score-pill { font-size: .7rem; padding: .1rem .5rem; border: 0; border-radius: 1rem; background: var(--danger-bg); color: var(--danger); font-weight: 700; cursor: pointer; }
+    .score-pill.hi { background: var(--success-bg); color: var(--success); }
+    .score-pill.mid { background: var(--warning-bg); color: var(--warning); }
+    .why { background: var(--surface-2); border-radius: 8px; padding: 6px 8px; margin-top: 6px; }
+    .why div { margin: 3px 0; }
+</style>
+
+<div id="app" v-cloak>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+            <span class="me-3">Open pipeline: <strong>{{ format(state.openTotal) }}</strong></span>
+            <span class="me-3">Weighted: <strong class="text-success">{{ format(state.openWeighted) }}</strong></span>
+            <span>Leads: <strong>{{ state.openCount }}</strong></span>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <input type="search" class="form-control form-control-sm" style="width:220px" placeholder="Filter by title / company" v-model="state.search" />
+            <a class="btn btn-sm btn-outline-primary" href="/Pipelines/SalesForecast">Forecast</a>
+            <a class="btn btn-sm btn-outline-secondary" href="/Leads/LeadList">Lead list</a>
+            <button class="btn btn-sm btn-primary" @@click="methods.load()">Refresh</button>
+        </div>
+    </div>
+
+    <div class="kanban-wrap">
+        <div v-for="col in methods.filtered()" :key="col.key"
+             class="kanban-col" :class="{ 'col-won': col.key === 'Won', 'col-lost': col.key === 'Lost', 'drag-over': state.overKey === col.key }"
+             @@dragover.prevent="state.overKey = col.key"
+             @@dragleave="state.overKey = null"
+             @@drop.prevent="methods.drop(col)">
+            <div class="kanban-col-header">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ col.title }}</strong>
+                    <span class="badge bg-secondary">{{ col.cards.length }}</span>
+                </div>
+                <small class="text-muted">{{ format(col.totalAmount) }}<span v-if="col.key !== 'Won' && col.key !== 'Lost'"> &middot; {{ col.probability }}% &rarr; {{ format(col.weightedAmount) }}</span></small>
+            </div>
+            <div class="kanban-col-body">
+                <div v-for="card in col.cards" :key="card.id" class="kanban-card"
+                     :class="{ stale: card.isStale, hot: card.score >= 70 }"
+                     draggable="true"
+                     @@dragstart="methods.dragStart($event, card, col)"
+                     @@dragend="methods.dragEnd()">
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">{{ card.number }}</small>
+                        <button type="button" class="score-pill" :class="card.score >= 70 ? 'hi' : (card.score >= 40 ? 'mid' : '')" title="Deal health. Click to see why." @@click.stop="methods.toggleExplain(card.id)">{{ card.healthLabel }} &middot; {{ card.score }}</button>
+                    </div>
+                    <div class="fw-semibold">{{ card.title }}</div>
+                    <div class="small">{{ card.companyName }}</div>
+                    <div class="d-flex justify-content-between mt-1">
+                        <span class="fw-bold">{{ format(card.amount) }}</span>
+                        <small :class="card.isStale ? 'text-danger' : 'text-muted'">{{ methods.dateText(card.dateClosingEstimation) }}</small>
+                    </div>
+                    <small class="text-muted" v-if="card.salesTeamName">{{ card.salesTeamName }}</small>
+                    <div class="small mt-1" v-if="card.nextAction && col.key !== 'Won' && col.key !== 'Lost'"><i class="fas fa-lightbulb text-warning mr-1"></i>{{ card.nextAction }}</div>
+                    <div class="why small" v-if="state.explain === card.id && card.factors && card.factors.length">
+                        <div v-for="f in card.factors" :key="f.name"><strong>{{ f.name }}</strong> {{ f.points }}/{{ f.max }}<br /><span class="text-muted">{{ f.note }}</span></div>
+                    </div>
+                </div>
+                <div v-if="!col.cards.length" class="text-center text-muted small py-3">Drop leads here</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Pipelines/PipelineBoard.cshtml.js"></script>
+}

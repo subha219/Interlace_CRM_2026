@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>@ViewData["Title"] - Interlace</title>
+
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('crm-theme');
+                if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { t = 'dark'; }
+                if (t) { document.documentElement.setAttribute('data-theme', t); }
+            } catch (e) { }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/adminlte/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="~/css/crm-modern.css" />
+    <link rel="stylesheet" href="~/css/crm-compat.css?v=1" />
+    <link rel="stylesheet" href="~/css/crm-auth.css" />
+
+    @await RenderSectionAsync("styles", required: false)
+
+    <style>
+        [v-cloak] {
+            display: none !important;
+        }
+    </style>
+
+    @* vue *@
+    <script src="~/lib/vue/vue.global.prod.js"></script>
+
+    <!-- JavaScript Libraries -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js" defer></script>
+    <script src="~/lib/axios/axios.min.js" defer></script>
+    <script src="~/lib/sweetalert/sweetalert2v11.js" defer></script>
+    <script src="~/lib/interlace/storage-manager.js" defer></script>
+    <script src="~/lib/interlace/security-manager.js" defer></script>
+    <script src="~/lib/interlace/axios-manager.js" defer></script>
+</head>
+<body class="hold-transition auth-body">
+    <div class="auth-shell">
+        <aside class="auth-brand" aria-hidden="false">
+            <a class="auth-logo" asp-area="" asp-page="/Index"><span class="auth-logo-mark"><i class="fas fa-bolt"></i></span>Interlace</a>
+
+            <div class="auth-hero">
+                <h2>Know what to do next in every customer relationship.</h2>
+                <p>Pipeline, quotes, invoices and support in one place, with live insight that tells you where to focus today.</p>
+                <ul class="auth-points">
+                    <li><i class="fas fa-heart-pulse"></i><div><strong>Explainable deal health</strong><span>Every score shows its reasons and the next best action.</span></div></li>
+                    <li><i class="fas fa-address-card"></i><div><strong>Customer 360</strong><span>Revenue, balances, cases and history on one screen.</span></div></li>
+                    <li><i class="fas fa-wand-magic-sparkles"></i><div><strong>Built-in assistant</strong><span>Ask in plain words, draft follow-ups, press Ctrl+K anywhere.</span></div></li>
+                </ul>
+
+                <div class="auth-preview" aria-hidden="true">
+                    <div class="auth-glass">
+                        <div class="row-top"><span>Sample: weighted forecast</span><span class="chip">+18% vs last month</span></div>
+                        <div class="big">248,600</div>
+                        <svg viewBox="0 0 240 46" preserveAspectRatio="none"><polyline points="0,38 30,34 60,36 90,26 120,28 150,18 180,20 210,9 240,6" fill="none" stroke="#67e8f9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </div>
+                    <div class="auth-glass tip">
+                        <i class="fas fa-lightbulb"></i>
+                        <div><strong>Sample: rescue a stalled deal</strong><br />No activity for 16 days. Call the buyer or send a follow-up today. <span class="chip warn">At risk</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-foot">&copy; @DateTime.Now.Year Interlace</div>
+        </aside>
+
+        <main class="auth-main">
+            <div class="auth-top">
+                <button type="button" id="authTheme" title="Toggle dark mode" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
+            </div>
+            <div class="auth-card">
+                <div class="auth-mobile-logo"><a class="auth-logo" asp-area="" asp-page="/Index"><span class="auth-logo-mark"><i class="fas fa-bolt"></i></span>Interlace</a></div>
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <!-- jQuery -->
+    <script src="~/adminlte/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="~/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        (function () {
+            var root = document.documentElement;
+            var btn = document.getElementById('authTheme');
+            function icon() {
+                btn.innerHTML = '<i class="fas ' + (root.getAttribute('data-theme') === 'dark' ? 'fa-sun' : 'fa-moon') + '"></i>';
+            }
+            btn.addEventListener('click', function () {
+                var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                root.setAttribute('data-theme', next);
+                try { localStorage.setItem('crm-theme', next); } catch (e) { }
+                icon();
+            });
+            icon();
+
+            //>>> show / hide password
+            document.addEventListener('click', function (e) {
+                var t = e.target.closest('[data-pw]');
+                if (!t) return;
+                var input = document.querySelector(t.getAttribute('data-pw'));
+                if (!input) return;
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                t.innerHTML = '<i class="far ' + (show ? 'fa-eye-slash' : 'fa-eye') + '"></i>';
+                t.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+            });
+        })();
+    </script>
+
+    @await RenderSectionAsync("scripts", required: false)
+</body>
+</html>

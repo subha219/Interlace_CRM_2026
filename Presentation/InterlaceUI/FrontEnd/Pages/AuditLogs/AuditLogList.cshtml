@@ -1,0 +1,18 @@
+﻿@page
+@{
+    ViewData["Title"] = "Audit Log";
+}
+
+<div id="app" v-cloak>
+    <div class="row">
+        <div class="col-12">
+            <div class="grid-container">
+                <div ref="mainGridRef"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/AuditLogs/AuditLogList.cshtml.js"></script>
+}

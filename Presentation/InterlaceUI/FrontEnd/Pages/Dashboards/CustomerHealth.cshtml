@@ -1,0 +1,42 @@
+﻿@page
+@{
+    ViewData["Title"] = "Customer Health";
+}
+
+<div id="app" v-cloak>
+    <div class="d-flex align-items-center mb-3">
+        <p class="text-muted mb-0 flex-grow-1">Each customer scores up to 100: contact in the last months, support problems, overdue invoices and contract status (25 points each). Lowest scores first.</p>
+        <button class="btn btn-sm btn-outline-primary" @@click="load" :disabled="state.loading">Refresh</button>
+    </div>
+    <div v-if="state.loading" class="text-muted">Loading...</div>
+    <template v-else-if="state.d">
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><div class="small text-muted">Healthy</div><div style="font-size:1.8rem;font-weight:600">{{ state.d.healthy }}</div></div></div></div>
+            <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><div class="small text-muted">At risk</div><div style="font-size:1.8rem;font-weight:600">{{ state.d.atRisk }}</div></div></div></div>
+            <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><div class="small text-muted">Critical</div><div class="text-danger" style="font-size:1.8rem;font-weight:600">{{ state.d.critical }}</div></div></div></div>
+            <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><div class="small text-muted">Contract value not healthy</div><div style="font-size:1.8rem;font-weight:600">{{ money(state.d.valueAtRisk) }}</div></div></div></div>
+        </div>
+        <div class="d-flex gap-2 mb-2">
+            <button class="btn btn-sm" :class="state.band === '' ? 'btn-primary' : 'btn-outline-secondary'" @@click="state.band = ''">All</button>
+            <button class="btn btn-sm" v-for="b in ['Critical','At risk','Healthy']" :key="b" :class="state.band === b ? 'btn-primary' : 'btn-outline-secondary'" @@click="state.band = b">{{ b }}</button>
+        </div>
+        <div class="card"><div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Customer</th><th>Score</th><th>Contact</th><th>Support</th><th>Payments</th><th>Contract</th><th>Last contact</th><th>Open cases</th><th>Overdue inv.</th></tr></thead>
+                <tbody>
+                    <tr v-if="!rows.length"><td colspan="9" class="text-muted">Nothing to show. Only customers in the "Customer" lifecycle stage are scored.</td></tr>
+                    <tr v-for="r in rows" :key="r.customerId">
+                        <td>{{ r.name }}</td>
+                        <td><span class="badge" :class="r.band === 'Healthy' ? 'bg-success' : r.band === 'Critical' ? 'bg-danger' : 'bg-warning text-dark'">{{ r.total }} · {{ r.band }}</span></td>
+                        <td>{{ r.engagement }}/25</td><td>{{ r.support }}/25</td><td>{{ r.payments }}/25</td><td>{{ r.contract }}/25 <span class="small text-muted">{{ r.contractState }}</span></td>
+                        <td>{{ r.daysSinceContact === null ? 'never' : r.daysSinceContact + ' d ago' }}</td><td>{{ r.openCases }}</td><td>{{ r.overdueInvoices }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div></div>
+    </template>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Dashboards/CustomerHealth.cshtml.js"></script>
+}

@@ -1,0 +1,139 @@
+﻿@page
+@{
+    ViewData["HideTitle"] = true;
+    ViewData["Title"] = "Business Overview";
+}
+
+<link rel="stylesheet" href="~/css/crm-dashboard.css?v=3" />
+
+<div id="app" v-cloak class="db">
+
+    <section class="db-hero" style="background:radial-gradient(900px 300px at 100% -20%,rgba(255,255,255,.2),transparent 60%),linear-gradient(120deg,#0f766e 0%,#0891b2 50%,#4f46e5 100%);box-shadow:0 18px 40px -18px rgba(8,145,178,.65)">
+        <div style="position:relative;z-index:1;flex:1;min-width:260px">
+            <div class="db-date"><i class="far fa-calendar mr-1"></i>{{ todayText }}</div>
+            <h1>Business overview</h1>
+            <p class="db-brief">
+                Sales, marketing and finance in one place.
+                <template v-if="winRate !== null">Your win rate is <b>{{ winRate }}%</b></template>
+                <template v-if="budgetUsed !== null"> and <b>{{ budgetUsed }}%</b> of the budget has been spent.</template>
+            </p>
+            <div class="db-hero-actions">
+                <a class="db-btn db-btn-light" href="/Dashboards/InsightsDashboard"><i class="fas fa-bolt"></i>Open Command Center</a>
+                <a class="db-btn db-btn-ghost" href="/Pipelines/SalesForecast"><i class="fas fa-chart-line"></i>Sales forecast</a>
+                <button class="db-btn db-btn-ghost" @@click="load()" :disabled="loading"><i class="fas fa-rotate" :class="{ 'fa-spin': loading }"></i>Refresh</button>
+            </div>
+        </div>
+        <div class="db-hero-side">
+            <div class="db-gauge" title="Win rate: closed won value vs. lead value">
+                <svg viewBox="0 0 140 140">
+                    <circle class="t" cx="70" cy="70" r="56" fill="none" stroke-width="12"></circle>
+                    <circle class="v" cx="70" cy="70" r="56" fill="none" stroke-width="12" :stroke-dasharray="gaugeLen" :stroke-dashoffset="gaugeLen * (1 - (winRate || 0) / 100)"></circle>
+                </svg>
+                <div class="c"><b>{{ winRate === null ? '-' : winRate + '%' }}</b><span>Win rate</span></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="db-kpis" v-if="loading && !tiles.length"><div class="db-skel" v-for="n in 7" :key="n"></div></div>
+
+    <div class="db-kpis db-rise" v-if="tiles.length">
+        <a v-for="t in tiles" :key="t.label" :href="t.href" class="db-kpi" :style="{ '--k': t.color }">
+            <div class="db-kpi-top"><span class="db-ico"><i class="fas" :class="t.icon"></i></span><span class="db-kpi-l">{{ t.label }}</span></div>
+            <div class="db-kpi-v">{{ t.text }}</div>
+            <div class="db-kpi-f"><span>{{ t.note }}</span><i class="fas fa-arrow-right" style="color:var(--k)"></i></div>
+        </a>
+    </div>
+
+    <div class="db-grid db-rise">
+        <div class="db-card s6" v-if="show.leads">
+            <div class="db-card-h"><div><h3>Lead pipeline</h3><p>Number of leads in each stage</p></div><a class="db-link" href="/Leads/LeadList">Leads &rarr;</a></div>
+            <div v-if="!funnel.length" class="db-empty"><i class="fas fa-filter"></i>No leads yet.</div>
+            <div class="db-funnel" v-else>
+                <div class="db-fn" v-for="(s, i) in funnel" :key="s.x">
+                    <div class="db-fn-name" :title="s.x">{{ s.x }}</div>
+                    <div class="db-fn-bar" :style="{ width: Math.max(26, s.y / funnelMax * 100) + '%', '--c1': palette[i % palette.length][0], '--c2': palette[i % palette.length][1] }"><span>{{ s.y }}</span><small>{{ Math.round(s.y / funnelTotal * 100) }}%</small></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="db-card s6" v-if="show.leads">
+            <div class="db-card-h"><div><h3>Sales team achievement</h3><p>Share of closed deals by team</p></div><a class="db-link" href="/Leads/LeadList">Leads &rarr;</a></div>
+            <div v-if="!teamSegs.length" class="db-empty"><i class="fas fa-people-group"></i>No closed deals yet.</div>
+            <div class="db-donut-wrap" v-else>
+                <div class="db-donut"><svg viewBox="0 0 180 180"><circle cx="90" cy="90" r="70" stroke="var(--surface-2)"></circle><circle v-for="s in teamSegs" :key="s.x" cx="90" cy="90" r="70" :stroke="s.color" :stroke-dasharray="s.dash" :stroke-dashoffset="s.offset"></circle></svg><div class="c"><b>{{ teamSegs.length }}</b><span>teams</span></div></div>
+                <div class="db-donut-list"><div class="db-donut-row" v-for="s in teamSegs" :key="s.x"><i :style="{ background: s.color }"></i>{{ s.x }}<span>{{ s.pct }}%</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="db-grid db-rise">
+        <div class="db-card s4" v-if="show.budget">
+            <div class="db-card-h"><div><h3>Budget vs expense</h3><p>How much of the budget is used</p></div><a class="db-link" href="/Budgets/BudgetList">Budgets &rarr;</a></div>
+            <div class="db-donut-wrap">
+                <div class="db-donut">
+                    <svg viewBox="0 0 180 180"><circle cx="90" cy="90" r="70" stroke="var(--surface-2)"></circle><circle cx="90" cy="90" r="70" :stroke="(budgetUsed || 0) > 90 ? '#ef4444' : (budgetUsed || 0) > 70 ? '#f59e0b' : '#10b981'" :stroke-dasharray="budgetDash" stroke-linecap="round"></circle></svg>
+                    <div class="c"><b>{{ budgetUsed === null ? '-' : budgetUsed + '%' }}</b><span>spent</span></div>
+                </div>
+                <div class="db-donut-list">
+                    <div class="db-donut-row"><i style="background:#6366f1"></i>Budget<span>{{ short(crm.budgetTotalAmount) }}</span></div>
+                    <div class="db-donut-row"><i style="background:#f59e0b"></i>Expense<span>{{ short(crm.expenseTotalAmount) }}</span></div>
+                    <div class="db-donut-row"><i style="background:#10b981"></i>Left<span>{{ short(Math.max(0, (crm.budgetTotalAmount || 0) - (crm.expenseTotalAmount || 0))) }}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="db-card s4" v-if="show.campaigns">
+            <div class="db-card-h"><div><h3>Campaigns by status</h3><p>Where your campaigns stand</p></div><a class="db-link" href="/Campaigns/CampaignList">Campaigns &rarr;</a></div>
+            <div v-if="!campSegs.length" class="db-empty"><i class="fas fa-bullhorn"></i>No campaigns yet.</div>
+            <div class="db-donut-wrap" v-else>
+                <div class="db-donut"><svg viewBox="0 0 180 180"><circle cx="90" cy="90" r="70" stroke="var(--surface-2)"></circle><circle v-for="s in campSegs" :key="s.x" cx="90" cy="90" r="70" :stroke="s.color" :stroke-dasharray="s.dash" :stroke-dashoffset="s.offset"></circle></svg><div class="c"><b>{{ campSegs.length }}</b><span>statuses</span></div></div>
+                <div class="db-donut-list"><div class="db-donut-row" v-for="s in campSegs" :key="s.x"><i :style="{ background: s.color }"></i>{{ s.x }}<span>{{ s.pct }}%</span></div></div>
+            </div>
+        </div>
+
+        <div class="db-card s4" v-if="show.activity">
+            <div class="db-card-h"><div><h3>Lead activity</h3><p>What your team is doing</p></div><a class="db-link" href="/LeadActivities/LeadActivityList">Activities &rarr;</a></div>
+            <div v-if="!activity.length" class="db-empty"><i class="fas fa-list-check"></i>No activity logged.</div>
+            <div v-else>
+                <div class="db-hbar" v-for="(a, i) in activity" :key="a.x"><span :title="a.x">{{ a.x }}</span><div class="tr"><div :style="{ width: Math.max(4, a.y / activityMax * 100) + '%', background: palette[i % palette.length][0] }"></div></div><b>{{ a.y }}</b></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="db-grid db-rise">
+        <div class="db-card s12" v-if="tabs.length">
+            <div class="db-card-h">
+                <div><h3>Sales &amp; purchase breakdown</h3><p>Quantity by group and category</p></div>
+                <div class="db-seg"><button v-for="(t, i) in tabs" :key="t.key" :class="{ on: tab === i }" @@click="tab = i">{{ t.label }}</button></div>
+            </div>
+            <div v-if="!bars.cats.length" class="db-empty"><i class="fas fa-chart-column"></i>No data for this view yet.</div>
+            <template v-else>
+                <div class="db-legend mb-2"><span v-for="(s, i) in bars.series" :key="s.name"><i :style="{ background: barColors[i % barColors.length] }"></i>{{ s.name }}</span></div>
+                <svg class="db-chart" viewBox="0 0 700 260" role="img" aria-label="Breakdown chart">
+                    <g v-for="g in bars.grid" :key="g.y"><line class="db-grid-line" x1="44" x2="692" :y1="g.y" :y2="g.y" /><text class="db-axis" x="38" :y="g.y + 4" text-anchor="end">{{ g.v }}</text></g>
+                    <g v-for="b in bars.rects" :key="b.key"><rect :x="b.x" :y="b.y" :width="b.w" :height="b.h" rx="5" :fill="b.color"><title>{{ b.tip }}</title></rect></g>
+                    <text v-for="c in bars.labels" :key="c.name" class="db-axis" :x="c.x" y="244" text-anchor="middle">{{ c.name }}</text>
+                </svg>
+            </template>
+        </div>
+    </div>
+
+    <div class="db-grid db-rise">
+        <div class="db-card s6" v-if="show.sales">
+            <div class="db-card-h"><div><h3>Latest sales</h3><p>Most recent order lines</p></div><a class="db-link" href="/SalesOrders/SalesOrderList">All sales &rarr;</a></div>
+            <div v-if="!latestSales.length" class="db-empty"><i class="fas fa-receipt"></i>No sales orders yet.</div>
+            <table class="db-table" v-else><thead><tr><th>Date</th><th>Order</th><th>Product</th><th class="num">Total</th></tr></thead>
+                <tbody><tr v-for="(r, i) in latestSales" :key="i"><td>{{ day(r.salesOrder?.orderDate) }}</td><td>{{ r.salesOrder?.number }}</td><td>{{ r.product?.name }}</td><td class="num">{{ money(r.total) }}</td></tr></tbody></table>
+        </div>
+        <div class="db-card s6" v-if="show.purchase">
+            <div class="db-card-h"><div><h3>Latest purchases</h3><p>Most recent order lines</p></div><a class="db-link" href="/PurchaseOrders/PurchaseOrderList">All purchases &rarr;</a></div>
+            <div v-if="!latestPurchases.length" class="db-empty"><i class="fas fa-box"></i>No purchase orders yet.</div>
+            <table class="db-table" v-else><thead><tr><th>Date</th><th>Order</th><th>Product</th><th class="num">Total</th></tr></thead>
+                <tbody><tr v-for="(r, i) in latestPurchases" :key="i"><td>{{ day(r.purchaseOrder?.orderDate) }}</td><td>{{ r.purchaseOrder?.number }}</td><td>{{ r.product?.name }}</td><td class="num">{{ money(r.total) }}</td></tr></tbody></table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Dashboards/DefaultDashboard.cshtml.js"></script>
+}

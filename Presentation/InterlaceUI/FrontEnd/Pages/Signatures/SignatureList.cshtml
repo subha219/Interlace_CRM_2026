@@ -1,0 +1,35 @@
+﻿@page
+@{
+    ViewData["Title"] = "E-Signatures";
+}
+
+<div id="app" v-cloak>
+    <div class="alert alert-info py-2 small">
+        To request a signature, open <a href="/Contracts/ContractList">Contracts</a> (press <strong>Send for signature</strong>) or <a href="/Quotations/QuotationList">Quotations</a> (select a row, then <strong>Send for signature…</strong>). The signer confirms with a one-time code sent to their e-mail; the time, IP address, browser and a fingerprint of the exact text they saw are kept as evidence.
+    </div>
+    <div class="card"><div class="table-responsive"><table class="table align-middle mb-0">
+        <thead><tr><th>Number</th><th>Document</th><th>Signer</th><th>Status</th><th>Sent</th><th></th></tr></thead>
+        <tbody>
+            <tr v-if="!state.rows.length"><td colspan="6" class="text-muted">No signature requests yet.</td></tr>
+            <template v-for="r in state.rows" :key="r.id">
+                <tr>
+                    <td>{{ r.number }}</td><td>{{ r.title }}</td><td>{{ r.signerName }}<div class="small text-muted">{{ r.signerEmail }}</div></td>
+                    <td><span class="badge" :class="badge(r.status)">{{ r.status }}</span><div class="small text-muted" v-if="r.status === 'Sent' || r.status === 'Viewed'">expires {{ day(r.expiresAtUtc) }}</div></td>
+                    <td>{{ day(r.createdAtUtc) }}<div class="small text-muted">{{ r.requestedByName }}</div></td>
+                    <td class="text-end text-nowrap">
+                        <button class="btn btn-sm btn-outline-secondary" v-if="r.status === 'Signed' || r.status === 'Declined'" @@click="state.open = state.open === r.id ? null : r.id">Details</button>
+                        <button class="btn btn-sm btn-outline-danger" v-if="r.status === 'Sent' || r.status === 'Viewed' || r.status === 'Expired'" @@click="cancel(r)">Cancel</button>
+                    </td>
+                </tr>
+                <tr v-if="state.open === r.id"><td colspan="6" class="small">
+                    <div v-if="r.status === 'Signed'">Signed by <strong>{{ r.signedName }}</strong> on {{ when(r.signedAtUtc) }}<br />IP: {{ r.signedIp }}<br />Browser: {{ r.signedUserAgent }}<br />Document fingerprint (SHA-256): <code class="text-break">{{ r.documentHash }}</code></div>
+                    <div v-else>Declined. Reason: {{ r.declineReason || 'none given' }}</div>
+                </td></tr>
+            </template>
+        </tbody>
+    </table></div></div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Signatures/SignatureList.cshtml.js"></script>
+}

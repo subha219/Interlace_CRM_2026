@@ -1,0 +1,42 @@
+﻿@page
+@{
+    ViewData["Title"] = "Sales Forecast";
+}
+
+<div id="app" v-cloak>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <label class="mb-0">Months ahead</label>
+            <select class="form-select form-select-sm" style="width:90px" v-model.number="state.months" @@change="methods.load()">
+                <option :value="3">3</option>
+                <option :value="6">6</option>
+                <option :value="12">12</option>
+            </select>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="/Pipelines/PipelineBoard">Pipeline board</a>
+            <button class="btn btn-sm btn-success" @@click="methods.exportExcel()">Export Excel</button>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body text-center"><h6>Open pipeline</h6><div class="fs-4 text-primary">{{ format(state.data.openAmount) }}</div><small>{{ state.data.openCount }} leads</small></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body text-center"><h6>Weighted forecast</h6><div class="fs-4 text-success">{{ format(state.data.weightedAmount) }}</div><small>probability adjusted</small></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body text-center"><h6>Closed won</h6><div class="fs-4 text-warning">{{ format(state.data.wonAmount) }}</div><small>{{ state.data.wonCount }} deals &middot; avg {{ format(state.data.averageDealSize) }}</small></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body text-center"><h6>Win rate</h6><div class="fs-4">{{ state.data.winRate }}%</div><small>{{ state.data.wonCount }} won / {{ state.data.lostCount }} lost</small></div></div></div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6"><div class="card"><div class="card-body"><div ref="stageChartRef"></div></div></div></div>
+        <div class="col-lg-6"><div class="card"><div class="card-body"><div ref="monthChartRef"></div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h5 class="mb-0">By sales team</h5></div>
+        <div class="card-body"><div ref="teamGridRef"></div></div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Pipelines/SalesForecast.cshtml.js"></script>
+}

@@ -1,0 +1,76 @@
+@page
+@{
+    ViewData["Title"] = "Email";
+}
+
+<div id="app" v-cloak>
+    <div class="btn-group mb-3" role="group">
+        <button class="btn btn-sm" :class="state.tab === t.key ? 'btn-primary' : 'btn-outline-primary'" v-for="t in tabs" :key="t.key" @@click="state.tab = t.key">{{ t.label }}</button>
+    </div>
+
+    <div class="card" v-if="state.tab === 'compose'">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3"><label class="form-label">Send to a</label>
+                    <select class="form-select" v-model="state.c.relatedType" @@change="onType"><option value="">Any address</option><option value="Customer">Customer</option><option value="Lead">Lead</option></select></div>
+                <div class="col-md-5" v-if="state.c.relatedType"><label class="form-label">Record</label>
+                    <select class="form-select" v-model="state.c.relatedId" @@change="onPick"><option v-for="r in state.options" :key="r.id" :value="r.id">{{ r.name }}</option></select></div>
+                <div class="col-md-4"><label class="form-label">To</label><input class="form-control" type="email" v-model="state.c.to" placeholder="name@example.com" /></div>
+                <div class="col-md-4"><label class="form-label">Template</label>
+                    <select class="form-select" v-model="state.c.templateId" @@change="applyTemplate"><option value="">None</option><option v-for="t in state.templates" :key="t.id" :value="t.id">{{ t.name }}</option></select></div>
+                <div class="col-md-8"><label class="form-label">Subject</label><input class="form-control" v-model="state.c.subject" /></div>
+                <div class="col-12"><label class="form-label">Message</label>
+                    <textarea class="form-control" rows="10" v-model="state.c.body"></textarea>
+                    <div class="form-text">Merge fields: <code>{{ '{' + '{name}' + '}' }}</code> <code>{{ '{' + '{company}' + '}' }}</code> <code>{{ '{' + '{email}' + '}' }}</code> <code>{{ '{' + '{number}' + '}' }}</code> <code>{{ '{' + '{sender}' + '}' }}</code>. Plain text or HTML.</div></div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <div class="form-check"><input class="form-check-input" type="checkbox" id="mk" v-model="state.c.isMarketing" /><label class="form-check-label" for="mk">Marketing message (skipped for records that opted out)</label></div>
+                    <button class="btn btn-primary" @@click="send" :disabled="state.busy">Send e-mail</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" v-if="state.tab === 'sent'">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Sent</th><th>To</th><th>Subject</th><th>Related</th><th>By</th><th>Result</th></tr></thead>
+                <tbody>
+                    <tr v-if="!state.logs.length"><td colspan="6" class="text-center text-muted py-4">No e-mail sent yet.</td></tr>
+                    <tr v-for="l in state.logs" :key="l.id">
+                        <td>{{ fmt(l.sentAtUtc) }}</td><td>{{ l.toEmail }}</td><td>{{ l.subject }}</td>
+                        <td><span v-if="l.relatedType">{{ l.relatedType }}: {{ l.relatedName }}</span></td><td>{{ l.sentByName }}</td>
+                        <td><span class="badge" :class="l.success ? 'bg-success' : 'bg-danger'" :title="l.error">{{ l.success ? 'Sent' : 'Failed' }}</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div v-if="state.tab === 'templates'">
+        <div class="d-flex justify-content-end mb-2"><button class="btn btn-sm btn-primary" @@click="newTemplate">+ New template</button></div>
+        <div class="row g-3">
+            <div class="col-lg-5">
+                <div class="list-group">
+                    <button class="list-group-item list-group-item-action" v-for="t in state.templates" :key="t.id" :class="{ active: state.t.id === t.id }" @@click="editTemplate(t)">
+                        {{ t.name }} <span class="badge bg-warning text-dark ms-1" v-if="t.isMarketing">marketing</span>
+                    </button>
+                    <div class="list-group-item text-muted" v-if="!state.templates.length">No templates yet.</div>
+                </div>
+            </div>
+            <div class="col-lg-7" v-if="state.t.editing">
+                <div class="card"><div class="card-body">
+                    <div class="mb-2"><label class="form-label">Name</label><input class="form-control" v-model="state.t.name" /></div>
+                    <div class="mb-2"><label class="form-label">Subject</label><input class="form-control" v-model="state.t.subject" /></div>
+                    <div class="mb-2"><label class="form-label">Body</label><textarea class="form-control" rows="9" v-model="state.t.body"></textarea></div>
+                    <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="tm" v-model="state.t.isMarketing" /><label class="form-check-label" for="tm">Marketing template</label></div>
+                    <button class="btn btn-primary me-2" @@click="saveTemplate" :disabled="state.busy">Save</button>
+                    <button class="btn btn-outline-danger" v-if="state.t.id" @@click="deleteTemplate">Delete</button>
+                </div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Emails/EmailCenter.cshtml.js"></script>
+}

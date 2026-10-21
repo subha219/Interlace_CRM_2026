@@ -1,0 +1,191 @@
+﻿@page
+@{
+    ViewData["HideTitle"] = true;
+    ViewData["Title"] = "Command Center";
+}
+
+<link rel="stylesheet" href="~/css/crm-dashboard.css?v=3" />
+
+<div id="app" v-cloak class="db">
+
+    <section class="db-hero">
+        <div style="position:relative;z-index:1;flex:1;min-width:280px">
+            <div class="db-date"><i class="far fa-calendar mr-1"></i>{{ todayText }}</div>
+            <h1>{{ greeting }}</h1>
+            <p class="db-brief" v-if="d">
+                <template v-if="brief.priorities">You have <b>{{ brief.priorities }} priorit{{ brief.priorities === 1 ? 'y' : 'ies' }}</b> to act on today.</template>
+                <template v-else>Nothing urgent on your plate today.</template>
+                <template v-if="brief.riskCount"> <b>{{ brief.riskCount }} deal{{ brief.riskCount === 1 ? '' : 's' }}</b> worth <b>{{ money(brief.riskAmount) }}</b> need attention.</template>
+                <template v-if="brief.overdue > 0"> <b>{{ money(brief.overdue) }}</b> of receivables is overdue.</template>
+                <template v-if="brief.weighted > 0"> Weighted pipeline stands at <b>{{ money(brief.weighted) }}</b>.</template>
+            </p>
+            <p class="db-brief" v-else>Preparing your briefing&hellip;</p>
+            <div class="db-hero-actions">
+                <button class="db-btn db-btn-light" @@click="askAssistant()"><i class="fas fa-wand-magic-sparkles"></i>Ask the assistant</button>
+                <a class="db-btn db-btn-ghost" href="/Pipelines/PipelineBoard"><i class="fas fa-table-columns"></i>Pipeline board</a>
+                <button class="db-btn db-btn-ghost" @@click="load()" :disabled="state.loading"><i class="fas fa-rotate" :class="{ 'fa-spin': state.loading }"></i>Refresh</button>
+            </div>
+        </div>
+        <div class="db-hero-side" v-if="d">
+            <div class="db-gauge" :title="'Pipeline health score ' + health.score">
+                <svg viewBox="0 0 140 140">
+                    <circle class="t" cx="70" cy="70" r="56" fill="none" stroke-width="12"></circle>
+                    <circle class="v" cx="70" cy="70" r="56" fill="none" stroke-width="12" :stroke-dasharray="gaugeLen" :stroke-dashoffset="gaugeLen * (1 - health.score / 100)"></circle>
+                </svg>
+                <div class="c"><b>{{ health.score }}</b><span>Pipeline health</span></div>
+            </div>
+            <div class="db-hero-stats">
+                <div class="db-hero-stat"><small>Open pipeline</small><b>{{ money(brief.pipeline) }}</b></div>
+                <div class="db-hero-stat"><small>Open deals</small><b>{{ health.total }}</b></div>
+            </div>
+        </div>
+    </section>
+
+    <div v-if="state.error" class="db-card mb-3"><div class="db-empty"><i class="fas fa-triangle-exclamation"></i>{{ state.error }}</div></div>
+
+    <div class="db-kpis" v-if="state.loading && !d"><div class="db-skel" v-for="n in 8" :key="n"></div></div>
+
+    <template v-if="d">
+        <div class="db-kpis db-rise">
+            <a v-for="(k, i) in d.kpis" :key="k.key" :href="k.url || '#'" class="db-kpi" :class="{ alert: k.key === 'overdue' && k.value > 0 }" :style="{ '--k': style(k, i).color }">
+                <div class="db-kpi-top">
+                    <span class="db-ico"><i class="fas" :class="style(k, i).icon"></i></span>
+                    <span class="db-kpi-l">{{ k.label }}</span>
+                </div>
+                <div class="db-kpi-v">{{ fmt(k) }}</div>
+                <div class="db-kpi-f">
+                    <span v-if="k.previous !== null && k.previous !== undefined" class="db-delta" :class="deltaClass(k)">
+                        <i class="fas" :class="delta(k) > 0 ? 'fa-arrow-up' : delta(k) < 0 ? 'fa-arrow-down' : 'fa-minus'"></i>{{ Math.abs(delta(k)).toFixed(0) }}%
+                        <span style="font-weight:500;opacity:.8">vs last month</span>
+                    </span>
+                    <span v-else></span>
+                    <svg v-if="k.series && k.series.length > 1" class="db-spark" viewBox="0 0 92 34" preserveAspectRatio="none" aria-hidden="true">
+                        <defs><linearGradient :id="'sg' + i" x1="0" y1="0" x2="0" y2="1"><stop offset="0" :stop-color="style(k, i).color" stop-opacity=".35" /><stop offset="1" :stop-color="style(k, i).color" stop-opacity="0" /></linearGradient></defs>
+                        <polygon :points="spark(k.series) + ' 92,34 0,34'" :fill="'url(#sg' + i + ')'" />
+                        <polyline :points="spark(k.series)" fill="none" :stroke="style(k, i).color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+            </a>
+        </div>
+
+        <div class="db-grid db-rise">
+            <div class="db-card s8">
+                <div class="db-card-h">
+                    <div><h3>Cash received</h3><p>Payments collected over the last 6 months &middot; total <b>{{ money(revenueTotal) }}</b></p></div>
+                    <a class="db-link" href="/Payments/PaymentList">View payments &rarr;</a>
+                </div>
+                <div class="db-rel" @@mouseleave="hover = -1">
+                    <svg class="db-chart" viewBox="0 0 640 250" role="img" aria-label="Cash received by month" @@mousemove="onMove($event)">
+                        <defs>
+                            <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--primary)" stop-opacity=".38" /><stop offset="1" stop-color="var(--primary)" stop-opacity="0" /></linearGradient>
+                        </defs>
+                        <g v-for="t in yTicks" :key="t.y">
+                            <line class="db-grid-line" x1="46" :x2="632" :y1="t.y" :y2="t.y" />
+                            <text class="db-axis" x="38" :y="t.y + 4" text-anchor="end">{{ short(t.v) }}</text>
+                        </g>
+                        <path :d="areaPath" fill="url(#revFill)" />
+                        <path :d="linePath" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <g v-for="(p, i) in points" :key="i">
+                            <text class="db-axis" :x="p.x" y="244" text-anchor="middle">{{ p.name }}</text>
+                            <circle :cx="p.x" :cy="p.y" :r="hover === i ? 6 : 3.5" fill="var(--surface)" stroke="var(--primary)" stroke-width="2.5" />
+                        </g>
+                        <line v-if="hover >= 0" class="db-hover-line" :x1="points[hover].x" :x2="points[hover].x" y1="14" y2="214" />
+                    </svg>
+                    <div class="db-tip" v-if="hover >= 0" :style="{ left: (points[hover].x / 640 * 100) + '%', top: (points[hover].y / 250 * 100) + '%' }">
+                        {{ points[hover].name }}<b>{{ money(points[hover].value) }}</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="db-card s4">
+                <div class="db-card-h"><div><h3>Deal health</h3><p>Across {{ health.total }} open deals</p></div><a class="db-link" href="/Pipelines/PipelineBoard">Open board &rarr;</a></div>
+                <div v-if="!health.total" class="db-empty"><i class="fas fa-seedling"></i>No open deals yet.</div>
+                <div v-else class="db-donut-wrap">
+                    <div class="db-donut">
+                        <svg viewBox="0 0 180 180">
+                            <circle cx="90" cy="90" r="70" stroke="var(--surface-2)"></circle>
+                            <circle v-for="s in healthSegs" :key="s.name" cx="90" cy="90" r="70" :stroke="s.color" :stroke-dasharray="s.dash" :stroke-dashoffset="s.offset" stroke-linecap="butt"></circle>
+                        </svg>
+                        <div class="c"><b>{{ health.total }}</b><span>open deals</span></div>
+                    </div>
+                    <div class="db-donut-list">
+                        <div class="db-donut-row" v-for="s in healthSegs" :key="s.name"><i :style="{ background: s.color }"></i>{{ s.name }}<span>{{ s.count }}</span><em>{{ s.pct }}%</em></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="db-grid db-rise">
+            <div class="db-card s7">
+                <div class="db-card-h"><div><h3>What should I do now?</h3><p>Ranked by urgency and value</p></div></div>
+                <div v-if="!d.priorities.length" class="db-empty"><i class="fas fa-circle-check"></i>All clear. A good moment to follow up on healthy deals.</div>
+                <ul class="db-list" v-else>
+                    <li v-for="(p, i) in d.priorities" :key="i">
+                        <a :href="p.url" class="db-item">
+                            <span class="db-rank" :class="p.severity.toLowerCase()"><i class="fas" :class="icon(p.kind)"></i></span>
+                            <span>
+                                <div class="tt">{{ p.title }} <span class="pill ml-1" :class="'pill-' + p.severity.toLowerCase()">{{ p.severity }}</span></div>
+                                <div class="dd">{{ p.detail }}</div>
+                            </span>
+                            <span class="am" v-if="p.amount">{{ money(p.amount) }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="db-card s5">
+                <div class="db-card-h"><div><h3>Deals at risk</h3><p>Lowest health scores first</p></div><a class="db-link" href="/Leads/LeadList">All leads &rarr;</a></div>
+                <div v-if="!d.atRiskDeals.length" class="db-empty"><i class="fas fa-seedling"></i>All open deals look healthy.</div>
+                <ul class="db-list" v-else>
+                    <li v-for="x in d.atRiskDeals" :key="x.id">
+                        <a href="/Pipelines/PipelineBoard" class="db-item" :title="x.nextAction">
+                            <span class="score-ring" :class="ring(x.score)" :style="{ '--v': x.score }">{{ x.score }}</span>
+                            <span>
+                                <div class="tt">{{ x.title }}</div>
+                                <div class="dd"><i class="fas fa-lightbulb mr-1" style="color:var(--warning)"></i>{{ x.nextAction }}</div>
+                            </span>
+                            <span class="am">{{ money(x.amount) }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="db-grid db-rise">
+            <div class="db-card s5">
+                <div class="db-card-h"><div><h3>Pipeline funnel</h3><p>Open value by stage &middot; weighted <b>{{ money(brief.weighted) }}</b></p></div><a class="db-link" href="/Pipelines/SalesForecast">Forecast &rarr;</a></div>
+                <div v-if="!d.pipeline.length" class="db-empty"><i class="fas fa-filter"></i>No open deals.</div>
+                <div class="db-funnel" v-else>
+                    <div class="db-fn" v-for="(s, i) in d.pipeline" :key="s.name">
+                        <div class="db-fn-name" :title="s.name">{{ s.name }}</div>
+                        <div class="db-fn-bar" :style="{ width: pct(s.amount, maxStage) + '%', '--c1': palette[i % palette.length][0], '--c2': palette[i % palette.length][1] }" :title="'Weighted ' + money(s.weighted)">
+                            <span>{{ money(s.amount) }}</span><small>{{ s.count }} deal{{ s.count === 1 ? '' : 's' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="db-card s4">
+                <div class="db-card-h"><div><h3>Receivables ageing</h3><p>Outstanding <b>{{ money(ageingTotal) }}</b></p></div><a class="db-link" href="/Invoices/InvoiceList">Invoices &rarr;</a></div>
+                <div v-if="!ageingTotal" class="db-empty"><i class="fas fa-circle-check"></i>No outstanding invoices.</div>
+                <template v-else>
+                    <div class="db-stack"><div v-for="(a, i) in d.ageing" :key="a.name" :style="{ width: (a.amount / ageingTotal * 100) + '%', background: ageColor(i) }" :title="a.name + ': ' + money(a.amount)"></div></div>
+                    <div class="db-age">
+                        <div class="db-age-row" v-for="(a, i) in d.ageing" :key="a.name"><i :style="{ background: ageColor(i) }"></i>{{ a.name }}<b>{{ money(a.amount) }}</b><em>{{ a.count }} inv.</em></div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="db-card s3">
+                <div class="db-card-h"><div><h3>Quick actions</h3><p>Jump straight in</p></div></div>
+                <div class="db-quick">
+                    <a class="db-q" v-for="q in quick" :key="q.href" :href="q.href" :style="{ '--k': q.color }"><i class="fas" :class="q.icon"></i>{{ q.label }}</a>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Dashboards/InsightsDashboard.cshtml.js"></script>
+}

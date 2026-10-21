@@ -1,0 +1,50 @@
+﻿@page
+@{
+    ViewData["Title"] = "AI Governance";
+}
+
+<div id="app" v-cloak>
+    <div class="alert small" :class="state.d && state.d.settings.modelConfigured ? 'alert-info' : 'alert-warning'" v-if="state.d">
+        <span v-if="state.d.settings.modelConfigured">An AI model is connected. Only the facts of the record being summarised are sent to it, never whole tables. Usage is logged below (who, what, how big, never the text).</span>
+        <span v-else>No AI model is connected, so summaries show plain facts. Add an API key under "Assistant" in the settings file to turn AI on.</span>
+    </div>
+
+    <div class="row g-3" v-if="state.d">
+        <div class="col-lg-4">
+            <div class="card h-100"><div class="card-header"><h6 class="mb-0">Switch and limits</h6></div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="en" v-model="state.d.settings.enabled" /><label class="form-check-label" for="en">AI features on</label></div>
+                    <label class="form-label small mb-0">Requests per person per day (0 = no limit)</label>
+                    <input type="number" min="0" max="10000" class="form-control form-control-sm mb-2" v-model.number="state.d.settings.dailyLimitPerUser" />
+                    <label class="form-label small mb-0">Requests for the whole company per month (0 = no limit)</label>
+                    <input type="number" min="0" max="1000000" class="form-control form-control-sm mb-3" v-model.number="state.d.settings.monthlyLimitTotal" />
+                    <button class="btn btn-primary btn-sm" @@click="save">Save</button>
+                </div></div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100"><div class="card-header"><h6 class="mb-0">Usage this month</h6></div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between"><span>Today</span><strong>{{ state.d.usedToday }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>This month</span><strong>{{ state.d.usedThisMonth }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Failed</span><strong :class="state.d.failedThisMonth ? 'text-danger' : ''">{{ state.d.failedThisMonth }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between" v-for="u in state.d.byUser" :key="u.name"><span class="text-muted">{{ u.name }}</span><span>{{ u.count }}</span></li>
+                </ul></div>
+        </div>
+    </div>
+
+    <div class="card mt-3" v-if="state.d"><div class="card-header"><h6 class="mb-0">Latest 50 requests</h6></div>
+        <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+            <thead><tr><th>When</th><th>User</th><th>Feature</th><th>Record</th><th>Result</th><th>Time</th><th>Size</th></tr></thead>
+            <tbody>
+                <tr v-if="!state.d.recent.length"><td colspan="7" class="text-muted">No AI requests yet.</td></tr>
+                <tr v-for="(r, i) in state.d.recent" :key="i">
+                    <td>{{ (r.at || '').replace('T', ' ').substring(0, 16) }}</td><td>{{ r.user }}</td><td>{{ r.feature }}</td><td>{{ r.relatedType }}</td>
+                    <td><span class="badge" :class="r.success ? 'bg-success' : 'bg-danger'">{{ r.success ? 'OK' : (r.error || 'Failed') }}</span></td>
+                    <td>{{ r.durationMs }} ms</td><td>{{ r.chars }} chars</td>
+                </tr>
+            </tbody></table></div></div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/AiGovernance/AiSettings.cshtml.js"></script>
+}

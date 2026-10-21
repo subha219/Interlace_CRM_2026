@@ -1,0 +1,140 @@
+﻿@{
+    var userEmail = "Loading...";
+    var avatarUrl = "/noimage.png";
+    var appName = "Interlace";
+}
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a id="brandHome" href="/Dashboards/MyWork" class="brand-link d-flex justify-content-center align-items-center">
+        <span class="brand-text font-weight-light">@appName</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Sidebar user (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img id="AvatarImageSide" src="@avatarUrl" class="img-circle elevation-2" alt="User Image" style="width: 40px; height: 40px;">
+            </div>
+            <div class="info">
+                <a asp-area="" asp-page="/Profiles/MyProfile" class="d-block" id="userEmail">@userEmail</a>
+            </div>
+        </div>
+
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <div id="navbarnav" class="navbar-nav w-100">
+                <div id="mainMenuContainer">
+                    <div id="mainMenu"></div>
+                </div>
+            </div>
+        </nav>
+        <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+</aside>
+
+@* _sidebar.cshtml *@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        try {
+            const brand = document.getElementById('brandHome');
+            if (brand) brand.href = SecurityManager.homeUrl();
+            const email = StorageManager.getEmail();
+            const userEmail = `${email}`;
+            document.getElementById('userEmail').textContent = userEmail;
+
+            const currentUrl = window.location.pathname;
+            const firstSegment = currentUrl.split('/')[1];
+
+            function filterMenu(menuData, userRoles) {
+                const childMenus = menuData.filter(menu => {
+                    if (menu.navURL) {
+                        const firstSegment = menu.navURL.split('/')[1];
+                        const inSection = userRoles.some(role => role.toLowerCase() === firstSegment.toLowerCase());
+                        //>>> pages that list extra roles (the dashboards) also need one of those
+                        const extra = menu.roles && menu.roles.length ? menu.roles.some(r => userRoles.some(u => u.toLowerCase() === String(r).toLowerCase())) : true;
+                        return inSection && extra;
+                    }
+                    return false;
+                });
+
+                const validChildIds = new Set(childMenus.map(menu => menu.id));
+                const parentIds = new Set(childMenus.map(menu => menu.pid));
+                return menuData.filter(menu => validChildIds.has(menu.id) || parentIds.has(menu.id));
+            }
+
+            function updateMenuSelection(menuData, segment) {
+                const parentMap = {};
+                menuData.forEach(item => {
+                    parentMap[item.id] = item;
+                });
+
+                //>>> select the page that is open: exact path first, then the longest URL prefix, then the module
+                const path = window.location.pathname.replace(/\/+$/, '').toLowerCase();
+                const norm = (u) => (u || '').replace(/\/+$/, '').toLowerCase();
+                let target = menuData.find(i => i.navURL && norm(i.navURL) === path);
+                if (!target) {
+                    target = menuData.filter(i => i.navURL && path.startsWith(norm(i.navURL) + '/'))
+                        .sort((a, b) => b.navURL.length - a.navURL.length)[0];
+                }
+                if (!target) {
+                    target = menuData.find(i => i.navURL && i.navURL.toLowerCase().includes(`/${segment.toLowerCase()}`));
+                }
+
+                menuData.forEach(item => {
+                    item.isSelected = false;
+                    item.expanded = false;
+                    if (target && item === target) {
+                        item.isSelected = true;
+                        let parentId = item.pid;
+                        while (parentId) {
+                            const parent = parentMap[parentId];
+                            if (parent) {
+                                parent.expanded = true;
+                                parentId = parent.pid;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                });
+
+                return menuData;
+            }
+
+            const userRoles = StorageManager.getUserRoles();
+            let menuData = StorageManager.getMenuNavigation();
+            const filteredMenu = filterMenu(menuData, userRoles);
+            menuData = updateMenuSelection(filteredMenu, firstSegment);
+
+            const mainMenu = new ej.navigations.TreeView({
+                fullRowNavigable: true,
+                fields: {
+                    dataSource: menuData,
+                    id: 'id',
+                    text: 'name',
+                    selected: 'isSelected',
+                    parentID: 'pid',
+                    hasChildren: 'hasChild',
+                    expanded: 'expanded',
+                    navigateUrl: 'navURL',
+                },
+                enablePersistence: false,
+            });
+            mainMenu.appendTo('#mainMenu');
+
+            //>>> make sure only the open page is highlighted, whatever the tree selected by default
+            const active = menuData.find(i => i.isSelected);
+            if (active) {
+                mainMenu.selectedNodes = [String(active.id)];
+                mainMenu.dataBind();
+            }
+
+        } catch (error) {
+            console.error('Error fetching data from StorageManager:', error);
+        }
+    });
+</script>

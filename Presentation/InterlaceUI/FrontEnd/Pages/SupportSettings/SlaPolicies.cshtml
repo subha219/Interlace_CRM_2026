@@ -1,0 +1,28 @@
+@page
+@{
+    ViewData["Title"] = "Support SLA";
+}
+
+<div id="app" v-cloak>
+    <div class="alert alert-info small">Set how fast each priority must get a first reply and a resolution. New cases take their due dates from these targets. When a case misses its resolution target, the escalation contact is notified once.</div>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Priority</th><th style="width:190px">First response (hours)</th><th style="width:190px">Resolution (hours)</th><th>Escalate to</th></tr></thead>
+                <tbody>
+                    <tr v-for="p in state.policies" :key="p.priority">
+                        <td>{{ p.priority }}</td>
+                        <td><input type="number" min="1" max="720" class="form-control form-control-sm" v-model.number="p.firstResponseHours" /></td>
+                        <td><input type="number" min="1" max="8760" class="form-control form-control-sm" v-model.number="p.resolutionHours" /></td>
+                        <td><select class="form-select form-select-sm" v-model="p.escalationUserId"><option :value="null">Nobody</option><option v-for="u in state.users" :key="u.id" :value="u.id">{{ u.name }}</option></select></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-body"><button class="btn btn-primary" @@click="save">Save</button></div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/SupportSettings/SlaPolicies.cshtml.js"></script>
+}

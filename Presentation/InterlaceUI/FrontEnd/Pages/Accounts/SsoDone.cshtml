@@ -1,0 +1,17 @@
+﻿@page
+@{
+    ViewData["Title"] = "Signing in";
+}
+
+<div id="app" v-cloak>
+    <div class="auth-status" v-if="!state.error"><h1 class="auth-title">Signing you in...</h1><p class="auth-sub">One moment.</p></div>
+    <div class="auth-status" v-else>
+        <h1 class="auth-title">Sign-in failed</h1>
+        <p class="auth-sub">{{ state.error }}</p>
+        <a href="/Accounts/Login">Back to sign in</a>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Accounts/SsoDone.cshtml.js"></script>
+}

@@ -1,0 +1,41 @@
+﻿@page
+@{
+    ViewData["Title"] = "Customer duplicates";
+}
+
+<div id="app" v-cloak data-entity="Customer">
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+        <p class="text-muted mb-0">Records that share an e-mail, phone number or name. Choose the one to keep; the others are merged into it (their contacts, activities and documents move across) and then removed.</p>
+        <button class="btn btn-primary" v-on:click="scan" :disabled="state.loading">
+            <span v-if="state.loading" class="spinner-border spinner-border-sm me-1"></span>Scan again
+        </button>
+    </div>
+
+    <div v-if="!state.loading && !state.groups.length" class="card"><div class="card-body text-center text-muted py-5">No duplicates found.</div></div>
+
+    <div class="card mb-3" v-for="(g, gi) in state.groups" :key="gi">
+        <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div>
+                <span class="badge bg-warning text-dark me-1" v-for="r in g.reasons">{{ r }}</span>
+                <span class="text-muted small">{{ g.items.length }} records</span>
+            </div>
+            <button class="btn btn-sm btn-success" v-on:click="merge(g)" :disabled="state.busy">Merge into selected</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr><th style="width:90px">Keep</th><th>Number</th><th>Name</th><th>E-mail</th><th>Phone</th><th>Created</th></tr></thead>
+                <tbody>
+                    <tr v-for="it in g.items" :key="it.id" :class="{ 'table-success': g.keep === it.id }">
+                        <td><input type="radio" class="form-check-input" :name="'keep' + gi" :value="it.id" v-model="g.keep" /></td>
+                        <td>{{ it.number }}</td><td>{{ it.name }}</td><td>{{ it.email }}</td><td>{{ it.phone }}</td>
+                        <td>{{ it.createdAtUtc ? String(it.createdAtUtc).substring(0, 10) : '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/js/crm-duplicates.js?v=1"></script>
+}

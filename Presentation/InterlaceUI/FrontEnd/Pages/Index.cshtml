@@ -1,0 +1,108 @@
+﻿@page
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interlace - know what to do next</title>
+    <meta name="description" content="Interlace: pipeline, quotes, invoices, support and live insight in one place.">
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('crm-theme');
+                if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { t = 'dark'; }
+                if (t) { document.documentElement.setAttribute('data-theme', t); }
+            } catch (e) { }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="~/adminlte/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="~/css/crm-modern.css" />
+    <link rel="stylesheet" href="~/css/crm-landing.css" />
+</head>
+<body class="landing">
+    <div class="lp-wrap">
+        <nav class="lp-nav" aria-label="Main">
+            <a class="lp-logo" href="/"><span class="lp-logo-mark"><i class="fas fa-bolt"></i></span>Interlace</a>
+            <div class="lp-actions">
+                <button class="lp-btn lp-icon" id="lpTheme" type="button" aria-label="Toggle dark mode" title="Toggle dark mode"><i class="fas fa-moon"></i></button>
+                <a class="lp-btn" asp-page="/Accounts/Register">Create account</a>
+                <a class="lp-btn primary" asp-page="/Accounts/Login">Sign in <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </nav>
+
+        <header class="lp-hero">
+            <span class="lp-eyebrow"><i class="fas fa-wand-magic-sparkles"></i> Insight built in</span>
+            <h1>Know what to do <em>next</em> in every customer relationship</h1>
+            <p>Pipeline, quotations, invoices and support in one place, with live deal health and a daily priority list so nothing slips.</p>
+            <div class="lp-cta">
+                <a class="lp-btn primary" asp-page="/Accounts/Login">Open your workspace <i class="fas fa-arrow-right"></i></a>
+                <a class="lp-btn" href="#features">See what is inside</a>
+            </div>
+
+            <div class="lp-mock" aria-hidden="true">
+                <div class="lp-mock-grid">
+                    <div class="lp-tile"><small>Revenue</small><strong>86,400</strong></div>
+                    <div class="lp-tile"><small>Pipeline</small><strong>412,000</strong></div>
+                    <div class="lp-tile"><small>Win rate</small><strong>38%</strong></div>
+                    <div class="lp-tile"><small>Overdue</small><strong style="color:var(--danger)">9,250</strong></div>
+                </div>
+                <div class="lp-mock-row">
+                    <div class="lp-list">
+                        <div><span><i class="fas fa-file-invoice-dollar mr-2" style="color:var(--danger)"></i>Collect invoice</span><span class="pill pill-high">High</span></div>
+                        <div><span><i class="fas fa-handshake mr-2" style="color:var(--warning)"></i>Rescue a stalled deal</span><span class="pill pill-medium">Medium</span></div>
+                        <div><span><i class="fas fa-headset mr-2" style="color:var(--info)"></i>Support case due soon</span><span class="pill pill-low">Low</span></div>
+                    </div>
+                    <div class="lp-list">
+                        <div><span>Prospecting</span><strong>12</strong></div>
+                        <div><span>Proposal</span><strong>7</strong></div>
+                        <div><span>Negotiation</span><strong>4</strong></div>
+                    </div>
+                </div>
+                <div class="lp-sample">Sample data for illustration</div>
+            </div>
+        </header>
+    </div>
+
+    <section class="lp-section" id="features">
+        <div class="lp-wrap">
+            <h2>Everything a growing team needs</h2>
+            <p>One system from first contact to cash received.</p>
+            <div class="lp-features">
+                <div class="lp-card"><i class="fas fa-table-columns"></i><h3>Kanban pipeline</h3><p>Drag deals between stages. Every card shows an explainable health score and the next best action.</p></div>
+                <div class="lp-card"><i class="fas fa-file-signature"></i><h3>Quotes to cash</h3><p>Quotations convert to invoices or orders, payments update balances, overdue items are flagged automatically.</p></div>
+                <div class="lp-card"><i class="fas fa-address-card"></i><h3>Customer 360</h3><p>Revenue, balance, documents, support cases and a merged timeline for every customer.</p></div>
+                <div class="lp-card"><i class="fas fa-headset"></i><h3>Support with SLAs</h3><p>Cases with priority, assignee and due dates, plus alerts before a promise is broken.</p></div>
+                <div class="lp-card"><i class="fas fa-chart-line"></i><h3>Forecast you can trust</h3><p>Weighted forecast by stage, month and team, win rate and Excel export.</p></div>
+                <div class="lp-card"><i class="fas fa-wand-magic-sparkles"></i><h3>Assistant and Ctrl+K</h3><p>Ask in plain words, draft follow-ups, jump to any page or record from the keyboard.</p></div>
+            </div>
+
+            <div class="lp-band">
+                <h2>Ready when you are</h2>
+                <p>Sign in to see your day at a glance.</p>
+                <a class="lp-btn" asp-page="/Accounts/Login">Sign in <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="lp-foot">&copy; @DateTime.Now.Year Interlace</footer>
+
+    <script>
+        (function () {
+            var root = document.documentElement, b = document.getElementById('lpTheme');
+            function icon() { b.innerHTML = '<i class="fas ' + (root.getAttribute('data-theme') === 'dark' ? 'fa-sun' : 'fa-moon') + '"></i>'; }
+            b.addEventListener('click', function () {
+                var n = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                root.setAttribute('data-theme', n);
+                try { localStorage.setItem('crm-theme', n); } catch (e) { }
+                icon();
+            });
+            icon();
+        })();
+    </script>
+</body>
+</html>

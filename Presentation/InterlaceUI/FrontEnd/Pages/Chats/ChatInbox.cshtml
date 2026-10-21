@@ -1,0 +1,65 @@
+﻿@page
+@{
+    ViewData["Title"] = "Live Chat";
+}
+
+<div id="app" v-cloak>
+    <div class="card mb-3"><div class="card-body py-2">
+        <div class="small mb-1">Put the chat button on your website by adding this line before <code>&lt;/body&gt;</code>:</div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <code class="flex-grow-1 text-break">&lt;script src="{{ origin }}/js/chat-embed.js" async&gt;&lt;/script&gt;</code>
+            <button class="btn btn-sm btn-outline-secondary" @@click="copy">Copy</button>
+            <a class="btn btn-sm btn-outline-primary" href="/Accounts/ChatWidget" target="_blank" rel="noopener">Try the visitor chat</a>
+        </div>
+    </div></div>
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Chats <span class="badge bg-danger" v-if="state.unread">{{ state.unread }}</span></span>
+                    <div class="form-check mb-0"><input class="form-check-input" type="checkbox" id="cl" v-model="state.closed" @@change="loadList" /><label class="form-check-label small" for="cl">Closed</label></div>
+                </div>
+                <div class="list-group list-group-flush" style="max-height:65vh;overflow:auto">
+                    <div class="list-group-item text-muted" v-if="!state.list.length">No chats.</div>
+                    <a href="#" class="list-group-item list-group-item-action" v-for="c in state.list" :key="c.id" :class="state.chat && state.chat.id === c.id ? 'active' : ''" @@click.prevent="open(c.id)">
+                        <div class="d-flex justify-content-between"><strong>{{ c.visitorName }}</strong><span class="badge bg-danger" v-if="c.agentUnread">new</span><span class="badge bg-secondary" v-else-if="c.status !== 'Open'">closed</span></div>
+                        <div class="small text-truncate">{{ c.lastText }}</div>
+                        <div class="small opacity-75">{{ c.customerName ? c.customerName + ' · ' : '' }}{{ when(c.lastMessageAtUtc) }}</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card" v-if="state.chat">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><strong>{{ state.chat.visitorName }}</strong> <span class="text-muted small">{{ state.chat.visitorEmail }}</span>
+                        <span class="badge bg-info" v-if="state.chat.customerName">Customer: {{ state.chat.customerName }}</span>
+                        <span class="text-muted small" v-if="state.chat.assignedUserName"> · {{ state.chat.assignedUserName }}</span></span>
+                    <span>
+                        <a class="btn btn-sm btn-outline-success" v-if="state.chat.caseId" href="/SupportCases/SupportCaseList">Case {{ state.chat.caseNumber }}</a>
+                        <button class="btn btn-sm btn-outline-primary" v-else :disabled="state.busy" @@click="makeCase">Create support case</button>
+                        <button class="btn btn-sm btn-outline-secondary" v-if="state.chat.status === 'Open'" @@click="close">Close chat</button>
+                    </span>
+                </div>
+                <div class="card-body" style="max-height:50vh;overflow:auto" ref="box">
+                    <div v-for="m in state.messages" :key="m.id" class="mb-2 d-flex" :class="m.fromVisitor ? '' : 'justify-content-end'">
+                        <div class="p-2 rounded" style="max-width:75%;white-space:pre-wrap" :class="m.fromVisitor ? 'bg-light border text-dark' : 'bg-primary text-white'">
+                            {{ m.body }}<div class="small opacity-75">{{ m.senderName }} · {{ when(m.atUtc) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer" v-if="state.chat.status === 'Open'">
+                    <div class="d-flex gap-2">
+                        <textarea class="form-control form-control-sm" rows="2" maxlength="1000" v-model="state.text" placeholder="Reply" @@keydown.ctrl.enter="reply"></textarea>
+                        <button class="btn btn-sm btn-primary" :disabled="state.busy" @@click="reply">Send</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-muted" v-else>{{ state.list.length ? 'Pick a chat.' : 'No chats yet. Use "Try the visitor chat" to send a test message.' }}</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Chats/ChatInbox.cshtml.js"></script>
+}

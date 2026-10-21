@@ -1,0 +1,60 @@
+﻿@page
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div id="app" v-cloak>
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Sign in to see what needs your attention today.</p>
+
+    <p class="auth-error" v-if="state.ssoError">{{ state.ssoError }}</p>
+    <div v-if="state.providers.length" class="mb-3">
+        <a v-for="p in state.providers" :key="p.id" :href="'/api/Sso/Start?provider=' + p.id" class="auth-btn d-block text-center mb-2" style="background:transparent;border:1px solid var(--border,#cbd5e1);color:inherit;text-decoration:none">Continue with {{ p.name }}</a>
+        <div class="text-center small text-muted" v-if="state.passwordLogin">or use your password</div>
+    </div>
+
+    <form v-on:submit.prevent="handleSubmit" novalidate v-if="state.passwordLogin || !state.providers.length || state.showPassword">
+            <div class="auth-field">
+                <label for="Email">Email</label>
+                <div class="auth-input" :class="{ invalid: state.errors.email }">
+                    <i class="lead far fa-envelope"></i>
+                    <input id="Email" name="Email" type="email" placeholder="name@company.com" autocomplete="username" v-model="state.email" v-on:input="state.errors.email = ''" />
+                    
+                </div>
+                <p class="auth-error" v-if="state.errors.email">{{ state.errors.email }}</p>
+            </div>
+            <div class="auth-field">
+                <label for="Password">Password</label>
+                <div class="auth-input" :class="{ invalid: state.errors.password }">
+                    <i class="lead fas fa-lock"></i>
+                    <input id="Password" name="Password" type="password" placeholder="Your password" autocomplete="current-password" v-model="state.password" v-on:input="state.errors.password = ''" />
+                    <button type="button" class="pw-toggle" data-pw="#Password" aria-label="Show password"><i class="far fa-eye"></i></button>
+                </div>
+                <p class="auth-error" v-if="state.errors.password">{{ state.errors.password }}</p>
+            </div>
+            <div class="auth-field" v-if="state.needsCode">
+                <label for="TwoFactorCode">Verification code</label>
+                <div class="auth-input">
+                    <i class="lead fas fa-shield-alt"></i>
+                    <input id="TwoFactorCode" name="TwoFactorCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code or recovery code" v-model="state.code" />
+                </div>
+                <p class="auth-error" style="color:var(--text-muted,#64748b)">Open your authenticator app and enter the current code.
+                    <a href="#" v-on:click.prevent="sendEmailCode">Email me a code instead</a></p>
+            </div>
+            <button type="submit" v-bind:disabled="state.isSubmitting" class="auth-btn">
+                <span class="spinner-border spinner-border-sm" v-if="state.isSubmitting" role="status" aria-hidden="true"></span>
+                <span>{{ state.isSubmitting ? 'Please wait...' : (state.needsCode ? 'Verify and sign in' : 'Sign in') }}</span>
+            </button>
+    </form>
+
+    <div class="text-center small mb-2" v-if="!state.passwordLogin && state.providers.length && !state.showPassword"><a href="#" v-on:click.prevent="state.showPassword = true">Administrator sign-in</a></div>
+    <div class="auth-links">
+        <a asp-page="/Accounts/ForgotPassword">Forgot password?</a>
+        <a asp-page="/Accounts/Register">Create an account</a>
+    </div>
+    <div class="auth-note"><i class="fas fa-shield-halved"></i><span>Repeated failed attempts temporarily lock the account.</span></div>
+</div>
+
+@section scripts {
+    <script type="module" src="~/FrontEnd/Pages/Accounts/Login.cshtml.js"></script>
+}

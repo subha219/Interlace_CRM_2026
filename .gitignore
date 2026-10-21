@@ -1,0 +1,25 @@
+# build output
+bin/
+obj/
+*.user
+.vs/
+.idea/
+TestResults/
+*.suo
+
+# local backups and scratch
+_backup_*
+_to_delete/
+*.tar.gz
+*.log
+
+# secrets and runtime data: never commit these
+**/App_Keys/
+**/App_Data/
+appsettings.Production.json
+appsettings.*.local.json
+*.pfx
+.env
+
+# uploaded files created at runtime
+Presentation/InterlaceUI/wwwroot/app_data/

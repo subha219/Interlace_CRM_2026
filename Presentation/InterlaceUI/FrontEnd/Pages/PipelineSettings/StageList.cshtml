@@ -1,0 +1,31 @@
+﻿@page
+@{
+    ViewData["Title"] = "Pipeline Stages";
+}
+
+<div id="app" v-cloak>
+    <div class="alert alert-info small">Rename the pipeline stages and set the win probability of each. Probabilities drive the weighted pipeline value on the board, the sales forecast and Insights. Won deals always count 100% and lost deals 0%.</div>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>#</th><th>Standard name</th><th>Your name</th><th style="width:170px">Win probability %</th><th class="text-muted">Default</th></tr></thead>
+                <tbody>
+                    <tr v-for="(s, i) in state.stages" :key="s.stage">
+                        <td>{{ i + 1 }}</td><td>{{ s.defaultLabel }}</td>
+                        <td><input class="form-control form-control-sm" maxlength="100" v-model="s.label" /></td>
+                        <td><input type="number" min="0" max="100" class="form-control form-control-sm" v-model.number="s.probability" /></td>
+                        <td class="text-muted">{{ s.defaultProbability }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-body">
+            <button class="btn btn-primary" @@click="save">Save</button>
+            <button class="btn btn-outline-secondary" @@click="reset">Restore standard names and values</button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/PipelineSettings/StageList.cshtml.js"></script>
+}

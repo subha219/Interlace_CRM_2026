@@ -1,0 +1,170 @@
+﻿/* Modern data grid (Syncfusion) - works with light/dark tokens from crm-modern.css */
+.grid-container { padding: 0 !important; border-radius: 18px !important; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.e-grid, .e-grid .e-gridcontent, .e-grid .e-content, .e-grid .e-gridheader, .e-grid .e-headercontent { background: var(--surface) !important; }
+.e-grid { font-size: .875rem; color: var(--text); border: 0 !important; }
+
+/* toolbar */
+.e-grid .e-toolbar { padding: 10px 14px !important; min-height: 58px; background: var(--surface) !important; border: 0 !important; border-bottom: 1px solid var(--border) !important; }
+.e-grid .e-toolbar .e-toolbar-items { background: transparent !important; }
+.e-grid .e-toolbar .e-toolbar-item { margin-right: 4px; }
+.e-grid .e-toolbar .e-tbar-btn { height: 36px; min-width: 36px; border-radius: 10px !important; padding: 0 12px; border: 1px solid transparent !important; transition: background .12s ease; }
+.e-grid .e-toolbar .e-tbar-btn:hover { background: var(--primary-soft) !important; }
+.e-grid .e-toolbar .e-tbar-btn .e-icons, .e-grid .e-toolbar .e-tbar-btn-text { color: var(--primary-text) !important; font-weight: 600; font-size: .84rem; }
+.e-grid .e-toolbar .e-tbar-btn:disabled, .e-grid .e-toolbar .e-overlay .e-tbar-btn { opacity: .45; }
+.e-grid .e-toolbar .e-toolbar-item.e-separator { border-color: var(--border) !important; }
+.e-grid .e-toolbar .e-search { min-width: 260px; }
+.e-grid .e-toolbar .e-search .e-input-group { background: var(--surface-2) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; height: 38px; overflow: hidden; transition: border-color .12s ease, box-shadow .12s ease; }
+.e-grid .e-toolbar .e-search .e-input-group.e-input-focus { border-color: var(--primary) !important; box-shadow: 0 0 0 3px var(--primary-soft) !important; }
+.e-grid .e-toolbar .e-search input.e-input { background: transparent !important; color: var(--text) !important; padding-left: 12px; }
+.e-grid .e-toolbar .e-search input.e-input::placeholder { color: var(--text-muted) !important; }
+.e-grid .e-toolbar .e-search .e-input-group-icon, .e-grid .e-toolbar .e-search .e-search-icon { background: transparent !important; color: var(--text-muted) !important; border: 0 !important; }
+
+/* header */
+.e-grid .e-columnheader, .e-grid .e-headercell { background: var(--surface-2) !important; }
+.e-grid .e-headercell, .e-grid .e-detailheadercell { border-color: transparent !important; padding: 0 12px !important; height: 44px; }
+.e-grid .e-headercell .e-headertext, .e-grid .e-headercell .e-sortfilterdiv ~ .e-headercelldiv .e-headertext { color: var(--text-muted) !important; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.e-grid .e-gridheader { border-top: 0 !important; border-bottom: 1px solid var(--border) !important; }
+.e-grid .e-icon-filter, .e-grid .e-filtermenudiv, .e-grid .e-sortfilterdiv .e-icons, .e-grid .e-columnmenu { color: var(--text-muted) !important; }
+.e-grid .e-filtered::before, .e-grid .e-icon-filter.e-filtered { color: var(--primary) !important; }
+.e-grid .e-headercell:hover { background: var(--primary-soft) !important; }
+.e-grid .e-rhandler { border-right: 0 !important; }
+.e-grid .e-rhandler:hover, .e-grid .e-rhandler.e-rresize { background: var(--primary) !important; opacity: .55; }
+.e-grid .e-groupdroparea { background: var(--surface-2) !important; border: 0 !important; border-bottom: 1px dashed var(--border) !important; color: var(--text-muted) !important; font-size: .8rem; padding: 6px 14px; min-height: 34px; }
+
+/* rows */
+.e-grid .e-row { height: 46px; }
+.e-grid td.e-rowcell { border-color: var(--border) !important; padding: 8px 12px !important; color: var(--text) !important; font-size: .875rem; }
+.e-grid .e-row, .e-grid .e-row.e-altrow { background: var(--surface) !important; }
+.e-grid .e-row:hover .e-rowcell:not(.e-selectionbackground):not(.e-active) { background: var(--primary-soft) !important; }
+.e-grid .e-row.e-active .e-rowcell, .e-grid .e-rowcell.e-selectionbackground { background: var(--primary-soft) !important; color: var(--text) !important; }
+.e-grid .e-row.e-active td.e-rowcell:first-child { box-shadow: inset 3px 0 0 var(--primary); }
+.e-grid .e-emptyrow td { color: var(--text-muted) !important; text-align: center; padding: 56px 12px !important; font-size: .95rem; background: var(--surface) !important; }
+.e-grid .e-gridcontent .e-content::-webkit-scrollbar, .e-grid .e-movablecontent::-webkit-scrollbar { width: 10px; height: 10px; }
+.e-grid .e-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; border: 2px solid var(--surface); }
+.e-grid .e-content::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+.e-grid .e-content::-webkit-scrollbar-track { background: transparent; }
+.e-checkbox-wrapper .e-frame { border-radius: 5px; border-color: var(--border); background: var(--surface); }
+.e-checkbox-wrapper .e-frame.e-check, .e-checkbox-wrapper .e-frame.e-stop { background: var(--primary) !important; border-color: var(--primary) !important; color: #fff !important; }
+.e-checkbox-wrapper .e-label { color: var(--text); }
+
+/* pager */
+.e-grid .e-gridpager { background: var(--surface) !important; border: 0 !important; border-top: 1px solid var(--border) !important; padding: 10px 16px !important; min-height: 56px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.e-pager { background: transparent !important; color: var(--text-muted) !important; border: 0 !important; font-family: var(--font); }
+.e-pager div.e-parentmsgbar, .e-pager .e-pagerconstant, .e-pager .e-pagerexternalmsg { color: var(--text-muted) !important; font-size: .82rem; }
+.e-pager .e-pagerexternalmsg { font-weight: 600; }
+.e-pager .e-numericcontainer { margin: 0 6px; }
+.e-pager .e-numericcontainer .e-numericitem, .e-pager .e-numericcontainer .e-link { min-width: 34px; height: 34px; line-height: 34px; padding: 0 !important; border-radius: 10px !important; margin: 0 2px; color: var(--text) !important; background: transparent !important; border: 0 !important; font-weight: 600; text-align: center; }
+.e-pager .e-numericcontainer .e-numericitem:hover { background: var(--surface-2) !important; }
+.e-pager .e-numericcontainer .e-currentitem, .e-pager .e-numericcontainer .e-currentitem:hover { background: var(--primary) !important; color: #fff !important; box-shadow: 0 6px 14px -6px var(--primary); }
+.e-pager .e-first, .e-pager .e-prev, .e-pager .e-next, .e-pager .e-last, .e-pager .e-pp, .e-pager .e-np, .e-pager .e-nextpagedisabled, .e-pager .e-prevpagedisabled, .e-pager .e-firstpagedisabled, .e-pager .e-lastpagedisabled { background: transparent !important; color: var(--text) !important; border-radius: 10px !important; border: 0 !important; width: 34px; height: 34px; }
+.e-pager .e-icons, .e-pager .e-icons::before { color: var(--text) !important; }
+.e-pager .e-disable, .e-pager .e-disable .e-icons { opacity: .35; }
+.e-pager .e-first:hover, .e-pager .e-prev:hover, .e-pager .e-next:hover, .e-pager .e-last:hover, .e-pager .e-pp:hover, .e-pager .e-np:hover { background: var(--surface-2) !important; }
+.e-pager .e-pagesizes { margin: 0 8px; display: inline-flex; align-items: center; gap: 8px; }
+.e-pager .e-pagerdropdown { width: 92px; margin: 0; }
+.e-pager .e-pagerdropdown .e-input-group, .e-pager .e-pagerdropdown .e-ddl { background: var(--surface-2) !important; border: 1px solid var(--border) !important; border-radius: 10px !important; height: 36px; }
+.e-pager .e-pagerdropdown input.e-input, .e-pager .e-pagerdropdown .e-input-group-icon { background: transparent !important; color: var(--text) !important; font-weight: 600; }
+
+/* popups: Excel filter, column chooser, column menu, context menu */
+.e-dialog.e-popup, .e-filter-popup, .e-excelfilter.e-dialog, .e-ccdlg.e-dialog, .e-columnchooserdiv, .e-contextmenu-wrapper ul, .e-menu-wrapper ul, ul.e-contextmenu { background: var(--surface) !important; color: var(--text) !important; border: 1px solid var(--border) !important; border-radius: 14px !important; box-shadow: var(--shadow-lg) !important; }
+.e-dialog .e-dlg-content, .e-dialog .e-footer-content, .e-dialog .e-dlg-header-content, .e-filter-popup .e-dlg-content { background: transparent !important; color: var(--text) !important; border-color: var(--border) !important; }
+.e-dialog .e-dlg-header, .e-dialog .e-dlg-header .e-title-text { color: var(--text) !important; font-weight: 700; }
+.e-dialog .e-footer-content { padding: 10px 14px !important; border-top: 1px solid var(--border) !important; }
+.e-dialog .e-btn { border-radius: 9px !important; font-weight: 600; box-shadow: none !important; }
+.e-dialog .e-btn.e-primary, .e-dialog .e-footer-content .e-btn.e-primary { background: var(--primary) !important; border-color: var(--primary) !important; color: #fff !important; }
+.e-dialog .e-btn:not(.e-primary) { background: var(--surface-2) !important; color: var(--text) !important; border: 1px solid var(--border) !important; }
+.e-excelfilter .e-searchbox, .e-filter-popup .e-searchbox, .e-ccdlg .e-searchbox { background: var(--surface-2) !important; border: 1px solid var(--border) !important; border-radius: 10px !important; }
+.e-excelfilter .e-searchbox input, .e-ccdlg .e-searchbox input { background: transparent !important; color: var(--text) !important; }
+.e-excelfilter .e-checkboxlist, .e-excelfilter .e-checkboxlist .e-ftrchk, .e-ccdlg .e-cc-contentdiv { background: transparent !important; border-color: var(--border) !important; }
+.e-excelfilter .e-contextmenu-wrapper ul, .e-excelfilter .e-menu-wrapper ul { box-shadow: none !important; border: 0 !important; background: transparent !important; }
+.e-menu-item, .e-contextmenu-wrapper ul .e-menu-item { color: var(--text) !important; }
+.e-menu-item .e-menu-icon, .e-menu-item .e-caret { color: var(--text-muted) !important; }
+.e-contextmenu-wrapper ul .e-menu-item.e-focused, .e-contextmenu-wrapper ul .e-menu-item:hover, .e-menu-wrapper ul .e-menu-item:hover, .e-excelfilter .e-menu-item.e-selected { background: var(--primary-soft) !important; color: var(--primary-text) !important; }
+.e-filter-popup .e-input-group, .e-filter-popup .e-input-group.e-control-wrapper, .e-filter-popup input.e-input, .e-excelfilter .e-input-group { background: var(--surface-2) !important; color: var(--text) !important; border-color: var(--border) !important; border-radius: 9px !important; }
+.e-filter-popup .e-ddl .e-input-group-icon, .e-filter-popup .e-input-group-icon { color: var(--text-muted) !important; background: transparent !important; }
+.e-filter-popup .e-flm_optrdiv, .e-excelfilter .e-xlfl-dlgdiv { color: var(--text) !important; }
+.e-excelfilter .e-dlg-content .e-ccnt, .e-excelfilter .e-checkboxlist .e-checkbox-wrapper { color: var(--text) !important; }
+.e-columnchooser-btn { background: var(--surface-2) !important; color: var(--text) !important; border: 1px solid var(--border) !important; border-radius: 10px !important; }
+.e-dlg-overlay { background: rgba(10, 12, 28, .5) !important; }
+.e-grid .e-spinner-pane .e-spinner-inner svg circle { stroke: var(--primary) !important; }
+.e-grid .e-columnmenu:hover { color: var(--primary) !important; }
+.e-grid .e-detailrowexpand, .e-grid .e-detailrowcollapse, .e-grid .e-recordplusexpand, .e-grid .e-recordpluscollapse { color: var(--primary-text) !important; }
+.e-grid .e-summarycell { background: var(--surface-2) !important; font-weight: 700; }
+.e-grid .e-groupcaption { background: var(--surface-2) !important; color: var(--text) !important; font-weight: 600; }
+@media (max-width: 720px) { .e-grid .e-toolbar .e-search { min-width: 150px; } .e-grid .e-gridpager { justify-content: center; } }
+
+/* ---- round 2 fixes ---- */
+/* toolbar: disabled buttons must not show grey blocks */
+.e-grid .e-toolbar .e-toolbar-item, .e-grid .e-toolbar .e-toolbar-item.e-overlay, .e-grid .e-toolbar .e-toolbar-item.e-overlay .e-tbar-btn, .e-grid .e-toolbar .e-tbar-btn.e-overlay { background: transparent !important; }
+.e-grid .e-toolbar .e-toolbar-item.e-overlay { opacity: .38; pointer-events: none; }
+.e-grid .e-toolbar .e-toolbar-item.e-overlay .e-icons, .e-grid .e-toolbar .e-toolbar-item.e-overlay .e-tbar-btn-text { color: var(--text-muted) !important; }
+.e-grid .e-toolbar .e-toolbar-item { align-items: center; }
+
+/* table fills the card, no stray right edge line */
+.e-grid .e-headercontent, .e-grid .e-content, .e-grid .e-gridheader { border-right: 0 !important; }
+.e-grid .e-headercontent table.e-table, .e-grid .e-content table.e-table { width: 100% !important; table-layout: fixed; border: 0 !important; }
+.e-grid .e-headercontent { border-bottom: 0 !important; }
+.e-grid .e-table { border-color: transparent !important; }
+.e-grid .e-headercell:last-child, .e-grid td.e-rowcell:last-child { border-right: 0 !important; }
+.e-grid .e-columnheader .e-rhandler { display: none; }
+.e-grid .e-columnheader:hover .e-rhandler { display: block; }
+
+/* checkboxes */
+.e-grid .e-checkbox-wrapper .e-frame, .e-dialog .e-checkbox-wrapper .e-frame { width: 18px; height: 18px; border: 1.5px solid var(--text-muted) !important; background: transparent !important; border-radius: 5px !important; }
+.e-grid .e-checkbox-wrapper:hover .e-frame { border-color: var(--primary) !important; }
+.e-grid .e-checkbox-wrapper .e-frame.e-check, .e-grid .e-checkbox-wrapper .e-frame.e-stop, .e-dialog .e-checkbox-wrapper .e-frame.e-check, .e-dialog .e-checkbox-wrapper .e-frame.e-stop { background: var(--primary) !important; border-color: var(--primary) !important; color: #fff !important; }
+.e-grid .e-headercell .e-checkbox-wrapper { margin-left: 2px; }
+
+/* pager footer */
+.e-grid .e-gridpager { padding: 10px 16px !important; }
+.e-grid .e-pager { display: flex !important; align-items: center; flex-wrap: wrap; gap: 10px 14px; width: 100%; }
+.e-pager .e-pagercontainer { display: inline-flex !important; align-items: center; background: var(--surface-2) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; padding: 3px; margin: 0 !important; overflow: hidden; height: auto !important; }
+.e-pager .e-pagercontainer .e-icons, .e-pager .e-pagercontainer .e-icons::before { color: var(--text) !important; }
+.e-pager .e-pagercontainer .e-disable, .e-pager .e-pagercontainer .e-disable .e-icons::before { color: var(--text-muted) !important; opacity: .45; }
+.e-pager .e-numericcontainer { display: inline-flex; align-items: center; margin: 0 !important; }
+.e-pager .e-numericcontainer .e-numericitem:not(.e-hide), .e-pager .e-first, .e-pager .e-prev, .e-pager .e-next, .e-pager .e-last, .e-pager .e-pp:not(.e-hide), .e-pager .e-np:not(.e-hide) { display: inline-flex; align-items: center; justify-content: center; }
+.e-pager .e-hide, .e-pager .e-numericitem.e-hide, .e-pager .e-pp.e-hide, .e-pager .e-np.e-hide { display: none !important; }
+.e-pager .e-numericcontainer .e-numericitem.e-currentitem { background: var(--primary) !important; color: #fff !important; }
+.e-pager .e-numericcontainer .e-numericitem.e-currentitem .e-link, .e-pager .e-numericcontainer .e-currentitem a { color: #fff !important; }
+.e-pager .e-pagesizes { display: inline-flex !important; align-items: center; gap: 8px; margin: 0 !important; order: 2; }
+.e-pager .e-pagesizes .e-pagerconstant { margin: 0; white-space: nowrap; }
+.e-pager .e-pagerdropdown { width: 88px !important; margin: 0 !important; }
+.e-pager .e-parentmsgbar { order: 3; margin-left: auto !important; padding: 5px 12px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted) !important; font-weight: 600; font-size: .78rem; white-space: nowrap; }
+.e-pager .e-pagerexternalmsg { display: none; }
+
+/* row actions */
+.e-grid .ra-cell, .e-grid td.e-rowcell .row-actions { overflow: visible; }
+.row-actions { display: inline-flex; gap: 6px; align-items: center; justify-content: center; }
+.row-actions .ra { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-muted); display: grid; place-items: center; cursor: pointer; font-size: .8rem; transition: all .12s ease; padding: 0; }
+.row-actions .ra-edit:hover { background: var(--primary-soft); border-color: var(--primary); color: var(--primary-text); transform: translateY(-1px); }
+.row-actions .ra-del:hover { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); transform: translateY(-1px); }
+.row-actions .ra:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* round 3 */
+.e-excelfilter .e-label, .e-excelfilter .e-checkbox-wrapper .e-label, .e-filter-popup .e-label, .e-ccdlg .e-label, .e-columnchooserdiv .e-label, .e-dialog .e-checkbox-wrapper .e-label { color: var(--text) !important; }
+.e-excelfilter .e-ftrchk, .e-excelfilter .e-ftrchk .e-checkbox-wrapper, .e-excelfilter .e-checkboxlist { background: transparent !important; }
+
+.e-grid .e-rsuppress { display: none !important; }
+.e-grid .e-table { background: transparent !important; }
+
+/* ---- grouping & column drag ---- */
+.e-grid .e-groupdroparea { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.e-grid .e-groupdroparea.e-grouped { padding: 8px 14px; }
+.e-grid .e-groupdroparea .e-groupheadercell, .e-grid .e-grid-icon.e-groupheadercell, .e-grid .e-groupheadercell { display: inline-flex !important; align-items: center; gap: 6px; background: var(--primary-soft) !important; color: var(--primary-text) !important; border: 1px solid var(--primary) !important; border-radius: 99px !important; padding: 3px 6px 3px 12px !important; margin: 0 !important; font-size: .8rem; font-weight: 650; height: auto; line-height: 1.5; box-shadow: none !important; }
+.e-grid .e-groupheadercell div, .e-grid .e-groupheadercell span, .e-grid .e-groupheadercell .e-icons, .e-grid .e-groupheadercell .e-icons::before { color: var(--primary-text) !important; background: transparent !important; }
+.e-grid .e-groupheadercell .e-ungroupbutton, .e-grid .e-groupheadercell .e-grouptext { margin: 0; }
+.e-grid .e-groupheadercell .e-ungroupbutton:hover { color: var(--danger) !important; }
+.e-grid .e-indentcell, .e-grid .e-grouptopleftcell, .e-grid .e-lastgrouptopleftcell, .e-grid .e-recordplusexpand, .e-grid .e-recordpluscollapse, .e-grid .e-detailindentcell, .e-grid .e-headercell.e-grouptopleftcell, .e-grid .e-gridheader .e-indentcell { background: var(--surface-2) !important; border-color: transparent !important; }
+.e-grid .e-groupcaption, .e-grid td.e-groupcaption, .e-grid .e-groupcaptionrow { background: var(--surface-2) !important; color: var(--text) !important; font-weight: 700; border-color: var(--border) !important; }
+.e-grid .e-icon-gdownarrow, .e-grid .e-icon-grightarrow { color: var(--primary-text) !important; }
+.e-grid .e-groupcaption .e-groupcaption, .e-grid .e-groupcaption span { color: var(--text) !important; }
+.e-grid .e-headercell .e-headertext, .e-grid .e-headercell .e-headercelldiv { white-space: nowrap; }
+.e-grid .e-sortnumber { background: var(--primary) !important; color: #fff !important; }
+.e-grid .e-groupdroparea.e-hover, .e-grid .e-groupdroparea.e-dragged-over { background: var(--primary-soft) !important; border-color: var(--primary) !important; }
+/* header being dragged (clone) */
+.e-cloneproperties, .e-cloneproperties.e-dragclone, .e-cloneproperties.e-headercell, .e-grid-drag-clone { background: var(--surface) !important; color: var(--text) !important; border: 1px solid var(--primary) !important; border-radius: 10px !important; box-shadow: var(--shadow-lg) !important; padding: 2px 14px !important; font-weight: 650; font-size: .82rem; opacity: .97; }
+.e-cloneproperties .e-headercelldiv, .e-cloneproperties .e-headertext, .e-cloneproperties span, .e-cloneproperties div { color: var(--text) !important; background: transparent !important; }
+.e-cloneproperties .e-icons { color: var(--text-muted) !important; }
+.e-cloneproperties .e-icon-hide, .e-cloneproperties .e-errorelem, .e-cloneproperties .e-icon-drag { background: transparent; }
+.e-grid .e-columnheader.e-dragborder, .e-grid .e-headercell.e-dragborder { border-color: var(--primary) !important; }
+.e-grid .e-reorderuparrow, .e-grid .e-reorderdownarrow { color: var(--primary) !important; }
+.e-grid .e-headercell.e-mousepointer:active { cursor: grabbing; }

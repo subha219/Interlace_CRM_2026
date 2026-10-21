@@ -1,0 +1,56 @@
+@page
+@{
+    ViewData["Title"] = "Documents";
+}
+
+<div id="app" v-cloak>
+    <div class="card mb-3">
+        <div class="card-header"><h5 class="mb-0">Attach a document</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2"><label class="form-label">Record type</label>
+                    <select class="form-select" v-model="state.u.relatedType" @@change="onType('u')"><option v-for="t in types" :key="t.key" :value="t.key">{{ t.label }}</option></select></div>
+                <div class="col-md-4"><label class="form-label">Record</label>
+                    <select class="form-select" v-model="state.u.relatedId"><option v-for="r in state.uOptions" :key="r.id" :value="r.id">{{ r.name }}</option></select></div>
+                <div class="col-md-3"><label class="form-label">File</label><input type="file" class="form-control" ref="fileRef" /></div>
+                <div class="col-md-3"><label class="form-label">Note</label><input class="form-control" v-model="state.u.description" placeholder="optional" /></div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <span class="form-text">PDF, Word, Excel, PowerPoint, text, CSV and images up to 25 MB.</span>
+                    <button class="btn btn-primary" @@click="upload" :disabled="state.busy">Upload</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex flex-wrap gap-2 align-items-center">
+            <h5 class="mb-0 me-auto">Documents</h5>
+            <select class="form-select form-select-sm" style="width:auto" v-model="state.f.relatedType" @@change="onType('f')"><option value="">All records</option><option v-for="t in types" :key="t.key" :value="t.key">{{ t.label }}</option></select>
+            <select class="form-select form-select-sm" style="width:260px" v-if="state.f.relatedType" v-model="state.f.relatedId" @@change="load"><option value="">All {{ state.f.relatedType }}s</option><option v-for="r in state.fOptions" :key="r.id" :value="r.id">{{ r.name }}</option></select>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>File</th><th>Related to</th><th>Note</th><th>Size</th><th>Uploaded</th><th>By</th><th style="width:150px"></th></tr></thead>
+                <tbody>
+                    <tr v-if="!state.docs.length"><td colspan="7" class="text-center text-muted py-4">No documents yet.</td></tr>
+                    <tr v-for="d in state.docs" :key="d.id">
+                        <td>{{ d.originalName }}</td>
+                        <td>{{ d.relatedType }}: {{ d.relatedName }}</td>
+                        <td>{{ d.description }}</td>
+                        <td>{{ size(d.fileSize) }}</td>
+                        <td>{{ day(d.createdAtUtc) }}</td>
+                        <td>{{ d.uploadedByName }}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary" @@click="download(d)">Download</button>
+                            <button class="btn btn-sm btn-outline-danger" @@click="remove(d)">&times;</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Documents/DocumentList.cshtml.js"></script>
+}

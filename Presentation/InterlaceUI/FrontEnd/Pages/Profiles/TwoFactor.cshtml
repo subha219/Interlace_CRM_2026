@@ -1,0 +1,52 @@
+﻿@page
+@{
+    ViewData["Title"] = "Two-Factor Security";
+}
+
+<div id="app" v-cloak>
+    <div class="row">
+        <div class="col-lg-7 col-12">
+            <div class="card">
+                <div class="card-header"><h5>Two-factor authentication</h5></div>
+                <div class="card-body">
+                    <div v-if="state.loading" class="text-muted">Loading...</div>
+
+                    <div v-else-if="state.enabled">
+                        <p><span class="badge bg-success">Enabled</span> You are asked for a code from your authenticator app every time you sign in.</p>
+                        <div class="mb-3">
+                            <label class="form-label">Confirm your password to turn it off</label>
+                            <input type="password" class="form-control" v-model="state.password" autocomplete="current-password" />
+                        </div>
+                        <button class="btn btn-outline-danger" v-on:click="disable" :disabled="state.busy">Disable two-factor</button>
+                    </div>
+
+                    <div v-else>
+                        <p><span class="badge bg-secondary">Off</span> Add a second step to sign-in. Codes come from an authenticator app on your phone; nothing is sent by SMS.</p>
+                        <ol>
+                            <li>Install Google Authenticator, Microsoft Authenticator or Authy.</li>
+                            <li>Choose <b>Add account &rarr; Enter a setup key</b> (or scan the QR code), and use this key:
+                                <div class="my-2"><code style="font-size:1.05rem;letter-spacing:.08em;user-select:all">{{ state.sharedKeyFormatted }}</code></div>
+                                <div ref="qrRef" class="my-2"></div>
+                            </li>
+                            <li>Type the 6-digit code the app shows to confirm.</li>
+                        </ol>
+                        <div class="input-group" style="max-width:320px">
+                            <input type="text" inputmode="numeric" class="form-control" placeholder="123456" v-model="state.code" v-on:keyup.enter="enable" />
+                            <button class="btn btn-primary" v-on:click="enable" :disabled="state.busy">Turn on</button>
+                        </div>
+                    </div>
+
+                    <div v-if="state.recoveryCodes.length" class="alert alert-warning mt-4">
+                        <b>Save these recovery codes now.</b> Each one works once if you lose your phone. They will not be shown again.
+                        <pre class="mt-2 mb-0" style="font-size:1rem">{{ state.recoveryCodes.join('\n') }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/lib/qrcode/qrcode.js"></script>
+    <script src="~/FrontEnd/Pages/Profiles/TwoFactor.cshtml.js"></script>
+}

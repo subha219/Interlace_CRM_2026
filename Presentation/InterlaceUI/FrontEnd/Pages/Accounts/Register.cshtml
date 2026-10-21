@@ -1,0 +1,79 @@
+﻿@page
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div id="app" v-cloak>
+    <h1 class="auth-title">Create your account</h1>
+    <p class="auth-sub">Set up your workspace in a minute.</p>
+
+    <form v-on:submit.prevent="handleSubmit" novalidate>
+            <div class="auth-field">
+                <label for="Email">Work email</label>
+                <div class="auth-input" :class="{ invalid: state.errors.email }">
+                    <i class="lead far fa-envelope"></i>
+                    <input id="Email" name="Email" type="email" placeholder="name@company.com" autocomplete="email" v-model="state.email" v-on:input="state.errors.email = ''" />
+                    
+                </div>
+                <p class="auth-error" v-if="state.errors.email">{{ state.errors.email }}</p>
+            </div>
+            <div class="auth-field">
+                <label for="CompanyName">Company</label>
+                <div class="auth-input">
+                    <i class="lead far fa-building"></i>
+                    <input id="CompanyName" name="CompanyName" type="text" placeholder="Company name" autocomplete="organization" v-model="state.companyName" />
+                </div>
+            </div>
+            <div class="auth-row">
+            <div class="auth-field">
+                <label for="FirstName">First name</label>
+                <div class="auth-input" :class="{ invalid: state.errors.firstName }">
+                    <i class="lead far fa-user"></i>
+                    <input id="FirstName" name="FirstName" type="text" placeholder="First name" autocomplete="given-name" v-model="state.firstName" v-on:input="state.errors.firstName = ''" />
+                    
+                </div>
+                <p class="auth-error" v-if="state.errors.firstName">{{ state.errors.firstName }}</p>
+            </div>
+            <div class="auth-field">
+                <label for="LastName">Last name</label>
+                <div class="auth-input" :class="{ invalid: state.errors.lastName }">
+                    <i class="lead far fa-user"></i>
+                    <input id="LastName" name="LastName" type="text" placeholder="Last name" autocomplete="family-name" v-model="state.lastName" v-on:input="state.errors.lastName = ''" />
+                    
+                </div>
+                <p class="auth-error" v-if="state.errors.lastName">{{ state.errors.lastName }}</p>
+            </div>
+            </div>
+            <div class="auth-field">
+                <label for="Password">Password</label>
+                <div class="auth-input" :class="{ invalid: state.errors.password }">
+                    <i class="lead fas fa-lock"></i>
+                    <input id="Password" name="Password" type="password" placeholder="At least 6 characters" autocomplete="new-password" v-model="state.password" v-on:input="state.errors.password = ''" />
+                    <button type="button" class="pw-toggle" data-pw="#Password" aria-label="Show password"><i class="far fa-eye"></i></button>
+                </div>
+                <p class="auth-error" v-if="state.errors.password">{{ state.errors.password }}</p>
+            </div>
+            <div class="auth-field">
+                <label for="ConfirmPassword">Confirm password</label>
+                <div class="auth-input" :class="{ invalid: state.errors.confirmPassword }">
+                    <i class="lead fas fa-lock"></i>
+                    <input id="ConfirmPassword" name="ConfirmPassword" type="password" placeholder="Re-type password" autocomplete="new-password" v-model="state.confirmPassword" v-on:input="state.errors.confirmPassword = ''" />
+                    <button type="button" class="pw-toggle" data-pw="#ConfirmPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                </div>
+                <p class="auth-error" v-if="state.errors.confirmPassword">{{ state.errors.confirmPassword }}</p>
+            </div>
+            <button type="submit" v-bind:disabled="state.isSubmitting" class="auth-btn">
+                <span class="spinner-border spinner-border-sm" v-if="state.isSubmitting" role="status" aria-hidden="true"></span>
+                <span>{{ state.isSubmitting ? 'Please wait...' : 'Create account' }}</span>
+            </button>
+    </form>
+
+    <div class="auth-links">
+        <a asp-page="/Accounts/Login">I already have an account</a>
+        <a asp-page="/Accounts/ForgotPassword">Forgot password?</a>
+    </div>
+</div>
+
+@section scripts {
+    <script type="module" src="~/FrontEnd/Pages/Accounts/Register.cshtml.js"></script>
+}

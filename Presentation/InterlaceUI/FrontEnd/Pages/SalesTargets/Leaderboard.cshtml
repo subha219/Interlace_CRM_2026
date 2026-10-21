@@ -1,0 +1,84 @@
+﻿@page
+@{
+    ViewData["Title"] = "Targets & Leaderboard";
+}
+
+<div id="app" v-cloak>
+    <div class="card mb-3">
+        <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+            <select class="form-select form-select-sm" style="width:auto" v-model="state.period" @@change="load">
+                <option>Month</option><option>Quarter</option><option>Year</option>
+            </select>
+            <select class="form-select form-select-sm" style="width:auto" v-model.number="state.number" @@change="load" v-if="state.period === 'Month'">
+                <option v-for="m in 12" :value="m">{{ monthNames[m - 1] }}</option>
+            </select>
+            <select class="form-select form-select-sm" style="width:auto" v-model.number="state.number" @@change="load" v-if="state.period === 'Quarter'">
+                <option v-for="q in 4" :value="q">Q{{ q }}</option>
+            </select>
+            <input type="number" class="form-control form-control-sm" style="width:90px" v-model.number="state.year" @@change="load" />
+            <strong class="ms-2">{{ state.label }}</strong>
+            <span class="flex-grow-1"></span>
+            <button class="btn btn-sm btn-outline-primary" @@click="state.editing = !state.editing">{{ state.editing ? 'Close targets' : 'Set targets' }}</button>
+        </div>
+    </div>
+
+    <div class="card mb-3" v-if="state.editing">
+        <div class="card-header"><h6 class="mb-0">Monthly revenue targets for {{ state.year }}</h6></div>
+        <div class="card-body">
+            <select class="form-select form-select-sm mb-3" style="max-width:280px" v-model="state.targetUser" @@change="loadTargets">
+                <option value="">Choose a person</option>
+                <option v-for="u in state.users" :value="u.id">{{ u.name }}</option>
+            </select>
+            <div class="row g-2" v-if="state.targetUser">
+                <div class="col-6 col-md-2" v-for="(m, i) in state.months" :key="i">
+                    <label class="small text-muted">{{ monthNames[i] }}</label>
+                    <input type="number" min="0" class="form-control form-control-sm" v-model.number="state.months[i]" />
+                </div>
+                <div class="col-12 mt-2">
+                    <button class="btn btn-sm btn-primary" @@click="saveTargets">Save targets</button>
+                    <button class="btn btn-sm btn-light" @@click="fillYear">Spread first month across year</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>#</th><th>Person</th><th class="text-end">Won</th><th class="text-end">Target</th><th style="min-width:160px">Attainment</th><th class="text-end">Win rate</th><th class="text-end">Open pipeline</th></tr></thead>
+                <tbody>
+                    <tr v-if="!state.rows.length"><td colspan="7" class="text-muted">No closed deals, open leads or targets in this period.</td></tr>
+                    <tr v-for="(r, i) in state.rows" :key="r.userId">
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ r.name }}</td>
+                        <td class="text-end">{{ money(r.won) }} <span class="small text-muted">({{ r.wonCount }})</span></td>
+                        <td class="text-end">{{ r.target ? money(r.target) : '-' }}</td>
+                        <td>
+                            <div v-if="r.target" class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height:8px"><div class="progress-bar" :style="{ width: Math.min(r.attainmentPercent, 100) + '%', background: r.attainmentPercent >= 100 ? '#16a34a' : r.attainmentPercent >= 60 ? '#d97706' : '#dc2626' }"></div></div>
+                                <span class="small">{{ r.attainmentPercent }}%</span>
+                            </div>
+                            <span v-else class="text-muted small">No target</span>
+                        </td>
+                        <td class="text-end">{{ r.winRatePercent }}% <span class="small text-muted">({{ r.wonCount }}/{{ r.wonCount + r.lostCount }})</span></td>
+                        <td class="text-end">{{ money(r.openPipeline) }} <span class="small text-muted">({{ r.openCount }})</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h6 class="mb-0">Stage velocity</h6><div class="small text-muted">Average days a lead stays in each stage (from stage history; builds up as leads move).</div></div>
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead><tr><th>Stage</th><th class="text-end">Times entered</th><th class="text-end">Average days</th></tr></thead>
+                <tbody><tr v-for="s in state.stages" :key="s.stage"><td>{{ s.stage }}</td><td class="text-end">{{ s.entered }}</td><td class="text-end">{{ s.averageDays || '-' }}</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/SalesTargets/Leaderboard.cshtml.js"></script>
+}

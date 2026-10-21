@@ -1,0 +1,24 @@
+﻿@page
+@{
+    ViewData["Title"] = "Logout";
+}
+
+<div id="app" v-cloak>
+    <div class="auth-status">
+        <div class="icon"><i class="fas fa-right-from-bracket"></i></div>
+        <h1 class="auth-title">Log out?</h1>
+        <p class="auth-sub">You will be signed out on this device and returned to the login page.</p>
+    </div>
+
+    <form v-on:submit.prevent="handleSubmit">
+            <button type="submit" v-bind:disabled="state.isSubmitting" class="auth-btn">
+                <span class="spinner-border spinner-border-sm" v-if="state.isSubmitting" role="status" aria-hidden="true"></span>
+                <span>{{ state.isSubmitting ? 'Please wait...' : 'Log out' }}</span>
+            </button>
+    </form>
+    <div class="auth-links"><a href="javascript:history.back()"><i class="fas fa-arrow-left mr-1"></i>Stay signed in</a></div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Accounts/Logout.cshtml.js"></script>
+}

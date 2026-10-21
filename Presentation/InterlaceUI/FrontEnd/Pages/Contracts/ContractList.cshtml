@@ -1,0 +1,62 @@
+﻿@page
+@{
+    ViewData["Title"] = "Contracts";
+}
+
+<div id="app" v-cloak>
+    <div class="row g-3 mb-3" v-if="state.d">
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><div class="small text-muted">Active contract value</div><div style="font-size:1.6rem;font-weight:600">{{ money(state.d.activeValue) }}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><div class="small text-muted">Ending in 30 / 60 / 90 days</div><div style="font-size:1.6rem;font-weight:600">{{ state.d.expiring30 }} / {{ state.d.expiring60 }} / {{ state.d.expiring90 }}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><div class="small text-muted">Expired, not renewed</div><div class="text-danger" style="font-size:1.6rem;font-weight:600">{{ state.d.expiredNotRenewed }}</div></div></div></div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+        <button class="btn btn-sm" v-for="f in filters" :key="f.key" :class="state.filter === f.key ? 'btn-primary' : 'btn-outline-secondary'" @@click="setFilter(f.key)">{{ f.label }}</button>
+        <span class="flex-grow-1"></span>
+        <button class="btn btn-sm btn-primary" @@click="add">New contract</button>
+    </div>
+
+    <div class="card mb-3" v-if="state.form">
+        <div class="card-body"><div class="row g-2">
+            <div class="col-md-4"><label class="form-label small mb-0">Title</label><input class="form-control form-control-sm" maxlength="200" v-model="state.form.title" /></div>
+            <div class="col-md-3"><label class="form-label small mb-0">Customer</label>
+                <select class="form-select form-select-sm" v-model="state.form.customerId"><option :value="null"></option><option v-for="c in state.customers" :key="c.id" :value="c.id">{{ c.name }}</option></select></div>
+            <div class="col-md-2"><label class="form-label small mb-0">Status</label>
+                <select class="form-select form-select-sm" v-model="state.form.status"><option v-for="s in ['Draft','Active','Cancelled','Renewed']" :key="s">{{ s }}</option></select></div>
+            <div class="col-md-3"><label class="form-label small mb-0">Billing</label>
+                <select class="form-select form-select-sm" v-model="state.form.billingCycle"><option :value="null">-</option><option v-for="s in ['Monthly','Quarterly','Yearly','OneTime']" :key="s">{{ s }}</option></select></div>
+            <div class="col-md-3"><label class="form-label small mb-0">Start</label><input type="date" class="form-control form-control-sm" v-model="state.form.startDate" /></div>
+            <div class="col-md-3"><label class="form-label small mb-0">End</label><input type="date" class="form-control form-control-sm" v-model="state.form.endDate" /></div>
+            <div class="col-md-2"><label class="form-label small mb-0">Value</label><input type="number" min="0" step="any" class="form-control form-control-sm" v-model.number="state.form.value" /></div>
+            <div class="col-md-2"><label class="form-label small mb-0">Notice days</label><input type="number" min="0" max="365" class="form-control form-control-sm" v-model.number="state.form.renewalNoticeDays" /></div>
+            <div class="col-md-2 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" id="ar" v-model="state.form.autoRenew" /><label class="form-check-label small" for="ar">Auto-renews</label></div></div>
+            <div class="col-12"><label class="form-label small mb-0">Notes</label><textarea class="form-control form-control-sm" rows="2" maxlength="2000" v-model="state.form.notes"></textarea></div>
+        </div>
+        <div class="mt-2"><button class="btn btn-sm btn-primary" @@click="save">Save</button> <button class="btn btn-sm btn-light" @@click="state.form = null">Cancel</button></div></div>
+    </div>
+
+    <div class="card"><div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Number</th><th>Contract</th><th>Customer</th><th>Status</th><th>Ends</th><th>Value</th><th></th></tr></thead>
+            <tbody>
+                <tr v-if="!rows.length"><td colspan="7" class="text-muted">No contracts.</td></tr>
+                <tr v-for="c in rows" :key="c.id">
+                    <td>{{ c.number }}</td><td>{{ c.title }}</td><td>{{ c.customerName }}</td>
+                    <td><span class="badge" :class="badge(c.effectiveStatus)">{{ c.effectiveStatus }}</span></td>
+                    <td>{{ day(c.endDate) }}<div class="small" :class="c.daysLeft !== null && c.daysLeft <= c.renewalNoticeDays ? 'text-danger' : 'text-muted'" v-if="c.daysLeft !== null">{{ c.daysLeft >= 0 ? c.daysLeft + ' days left' : '' }}</div></td>
+                    <td>{{ money(c.value) }}</td>
+                    <td class="text-end text-nowrap">
+                        <button class="btn btn-sm btn-outline-success" v-if="c.status === 'Active'" @@click="renew(c)">Renew</button>
+                        <button class="btn btn-sm btn-outline-primary" v-if="c.status === 'Draft' || c.status === 'Active'" @@click="sign(c)">Send for signature</button>
+                        <button class="btn btn-sm btn-outline-secondary" @@click="edit(c)">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" @@click="remove(c)">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div></div>
+</div>
+
+@section scripts {
+    <script src="~/FrontEnd/Pages/Contracts/ContractList.cshtml.js"></script>
+}
