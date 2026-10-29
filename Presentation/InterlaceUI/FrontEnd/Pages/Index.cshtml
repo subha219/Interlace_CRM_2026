@@ -7,8 +7,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Interlace - know what to do next</title>
-    <meta name="description" content="Interlace: pipeline, quotes, invoices, support and live insight in one place.">
+    <title>Interlace CRM - sales, support and service in one place</title>
+    <meta name="description" content="Interlace CRM brings your pipeline, quotes, invoices, Customer 360, support, WhatsApp and SMS, reports and approval-based AI agents into one system.">
     <script>
         (function () {
             try {
@@ -25,71 +25,296 @@
     <link rel="stylesheet" href="~/css/crm-landing.css" />
 </head>
 <body class="landing">
-    <div class="lp-wrap">
-        <nav class="lp-nav" aria-label="Main">
-            <a class="lp-logo" href="/"><span class="lp-logo-mark"><i class="fas fa-bolt"></i></span>Interlace</a>
-            <div class="lp-actions">
-                <button class="lp-btn lp-icon" id="lpTheme" type="button" aria-label="Toggle dark mode" title="Toggle dark mode"><i class="fas fa-moon"></i></button>
-                <a class="lp-btn" asp-page="/Accounts/Register">Create account</a>
-                <a class="lp-btn primary" asp-page="/Accounts/Login">Sign in <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </nav>
+    <a class="lp-skip" href="#main">Skip to content</a>
 
-        <header class="lp-hero">
-            <span class="lp-eyebrow"><i class="fas fa-wand-magic-sparkles"></i> Insight built in</span>
-            <h1>Know what to do <em>next</em> in every customer relationship</h1>
-            <p>Pipeline, quotations, invoices and support in one place, with live deal health and a daily priority list so nothing slips.</p>
-            <div class="lp-cta">
-                <a class="lp-btn primary" asp-page="/Accounts/Login">Open your workspace <i class="fas fa-arrow-right"></i></a>
-                <a class="lp-btn" href="#features">See what is inside</a>
-            </div>
-
-            <div class="lp-mock" aria-hidden="true">
-                <div class="lp-mock-grid">
-                    <div class="lp-tile"><small>Revenue</small><strong>86,400</strong></div>
-                    <div class="lp-tile"><small>Pipeline</small><strong>412,000</strong></div>
-                    <div class="lp-tile"><small>Win rate</small><strong>38%</strong></div>
-                    <div class="lp-tile"><small>Overdue</small><strong style="color:var(--danger)">9,250</strong></div>
+    <div class="lp-top">
+        <div class="lp-wrap">
+            <nav class="lp-nav" aria-label="Main">
+                <a class="lp-logo" href="/"><span class="lp-logo-mark"><i class="fas fa-bolt"></i></span>Interlace</a>
+                <div class="lp-links">
+                    <a href="#features">Features</a>
+                    <a href="#how">How it works</a>
+                    <a href="#ai">AI agents</a>
+                    <a href="#channels">Channels</a>
+                    <a href="#security">Security</a>
+                    <a href="#faq">FAQ</a>
                 </div>
-                <div class="lp-mock-row">
-                    <div class="lp-list">
-                        <div><span><i class="fas fa-file-invoice-dollar mr-2" style="color:var(--danger)"></i>Collect invoice</span><span class="pill pill-high">High</span></div>
-                        <div><span><i class="fas fa-handshake mr-2" style="color:var(--warning)"></i>Rescue a stalled deal</span><span class="pill pill-medium">Medium</span></div>
-                        <div><span><i class="fas fa-headset mr-2" style="color:var(--info)"></i>Support case due soon</span><span class="pill pill-low">Low</span></div>
-                    </div>
-                    <div class="lp-list">
-                        <div><span>Prospecting</span><strong>12</strong></div>
-                        <div><span>Proposal</span><strong>7</strong></div>
-                        <div><span>Negotiation</span><strong>4</strong></div>
-                    </div>
+                <div class="lp-actions">
+                    <button class="lp-btn lp-icon" id="lpTheme" type="button" aria-label="Toggle dark mode" title="Toggle dark mode"><i class="fas fa-moon"></i></button>
+                    <a class="lp-btn lp-hide-sm" asp-page="/Accounts/Register">Create account</a>
+                    <a class="lp-btn primary" asp-page="/Accounts/Login">Sign in <i class="fas fa-arrow-right"></i></a>
                 </div>
-                <div class="lp-sample">Sample data for illustration</div>
-            </div>
-        </header>
+            </nav>
+        </div>
     </div>
 
-    <section class="lp-section" id="features">
+    <main id="main">
         <div class="lp-wrap">
-            <h2>Everything a growing team needs</h2>
-            <p>One system from first contact to cash received.</p>
-            <div class="lp-features">
-                <div class="lp-card"><i class="fas fa-table-columns"></i><h3>Kanban pipeline</h3><p>Drag deals between stages. Every card shows an explainable health score and the next best action.</p></div>
-                <div class="lp-card"><i class="fas fa-file-signature"></i><h3>Quotes to cash</h3><p>Quotations convert to invoices or orders, payments update balances, overdue items are flagged automatically.</p></div>
-                <div class="lp-card"><i class="fas fa-address-card"></i><h3>Customer 360</h3><p>Revenue, balance, documents, support cases and a merged timeline for every customer.</p></div>
-                <div class="lp-card"><i class="fas fa-headset"></i><h3>Support with SLAs</h3><p>Cases with priority, assignee and due dates, plus alerts before a promise is broken.</p></div>
-                <div class="lp-card"><i class="fas fa-chart-line"></i><h3>Forecast you can trust</h3><p>Weighted forecast by stage, month and team, win rate and Excel export.</p></div>
-                <div class="lp-card"><i class="fas fa-wand-magic-sparkles"></i><h3>Assistant and Ctrl+K</h3><p>Ask in plain words, draft follow-ups, jump to any page or record from the keyboard.</p></div>
-            </div>
+            <header class="lp-hero">
+                <span class="lp-eyebrow"><i class="fas fa-wand-magic-sparkles"></i> Sales, support and service in one place</span>
+                <h1>Know what to do <em>next</em> in every customer relationship</h1>
+                <p>Pipeline, quotations, invoices, support and conversations in one CRM, with live deal health, a daily priority list and AI helpers that only act when a person approves.</p>
+                <div class="lp-cta">
+                    <a class="lp-btn primary lg" asp-page="/Accounts/Login">Open your workspace <i class="fas fa-arrow-right"></i></a>
+                    <a class="lp-btn lg" href="#features">See what is inside</a>
+                </div>
+                <ul class="lp-proof" aria-label="Highlights">
+                    <li><i class="fas fa-check"></i> Runs on your own server</li>
+                    <li><i class="fas fa-check"></i> Role-based access</li>
+                    <li><i class="fas fa-check"></i> WhatsApp, SMS, email and calls</li>
+                    <li><i class="fas fa-check"></i> Approval-based AI</li>
+                </ul>
 
-            <div class="lp-band">
-                <h2>Ready when you are</h2>
-                <p>Sign in to see your day at a glance.</p>
-                <a class="lp-btn" asp-page="/Accounts/Login">Sign in <i class="fas fa-arrow-right"></i></a>
-            </div>
+                <div class="lp-mock" aria-hidden="true">
+                    <div class="lp-mock-grid">
+                        <div class="lp-tile"><small>Revenue</small><strong>86,400</strong></div>
+                        <div class="lp-tile"><small>Pipeline</small><strong>412,000</strong></div>
+                        <div class="lp-tile"><small>Win rate</small><strong>38%</strong></div>
+                        <div class="lp-tile"><small>Overdue</small><strong style="color:var(--danger)">9,250</strong></div>
+                    </div>
+                    <div class="lp-mock-row">
+                        <div class="lp-list">
+                            <div><span><i class="fas fa-file-invoice-dollar mr-2" style="color:var(--danger)"></i> Collect invoice</span><span class="pill pill-high">High</span></div>
+                            <div><span><i class="fas fa-handshake mr-2" style="color:var(--warning)"></i> Rescue a stalled deal</span><span class="pill pill-medium">Medium</span></div>
+                            <div><span><i class="fas fa-headset mr-2" style="color:var(--info)"></i> Support case due soon</span><span class="pill pill-low">Low</span></div>
+                        </div>
+                        <div class="lp-list">
+                            <div><span>Prospecting</span><strong>12</strong></div>
+                            <div><span>Proposal</span><strong>7</strong></div>
+                            <div><span>Negotiation</span><strong>4</strong></div>
+                        </div>
+                    </div>
+                    <div class="lp-sample">Sample data for illustration</div>
+                </div>
+            </header>
         </div>
-    </section>
 
-    <footer class="lp-foot">&copy; @DateTime.Now.Year Interlace</footer>
+        <section class="lp-strip" aria-label="Areas covered">
+            <div class="lp-wrap">
+                <span>Sales</span><span>Marketing</span><span>Support</span><span>Finance</span><span>Purchasing</span><span>Inventory</span><span>Operations</span>
+            </div>
+        </section>
+
+        <section class="lp-section" id="features">
+            <div class="lp-wrap">
+                <h2>Everything a growing team needs</h2>
+                <p>One system from the first enquiry to cash received and the support that follows.</p>
+                <div class="lp-features">
+                    <div class="lp-card"><i class="fas fa-table-columns"></i><h3>Kanban pipeline</h3><p>Drag deals between stages. Every card shows an explainable health score and the next best action.</p></div>
+                    <div class="lp-card"><i class="fas fa-user-plus"></i><h3>Leads and contacts</h3><p>Capture leads, log activities, find duplicates and track targets on a sales leaderboard.</p></div>
+                    <div class="lp-card"><i class="fas fa-file-signature"></i><h3>Quotes to cash</h3><p>Quotations with approval convert to orders and invoices. Payments update balances and overdue items are flagged.</p></div>
+                    <div class="lp-card"><i class="fas fa-pen-nib"></i><h3>Contracts and e-signature</h3><p>Draft contracts and collect signatures without leaving the CRM.</p></div>
+                    <div class="lp-card"><i class="fas fa-address-card"></i><h3>Customer 360</h3><p>Revenue, balance, documents, support cases and a merged timeline for every customer.</p></div>
+                    <div class="lp-card"><i class="fas fa-headset"></i><h3>Support with SLAs</h3><p>Cases with categories, priority, assignee and due times, plus alerts before a promise is broken.</p></div>
+                    <div class="lp-card"><i class="fas fa-book-open"></i><h3>Help centre and live chat</h3><p>A knowledge base and a chat widget for your website, answered from one inbox.</p></div>
+                    <div class="lp-card"><i class="fab fa-whatsapp"></i><h3>WhatsApp, SMS and calls</h3><p>Message and call customers with reusable templates and a complete call log.</p></div>
+                    <div class="lp-card"><i class="fas fa-calendar-check"></i><h3>Email and calendar sync</h3><p>Gmail sync plus Google or Outlook calendar sync, set up by each person.</p></div>
+                    <div class="lp-card"><i class="fas fa-chart-line"></i><h3>Forecast you can trust</h3><p>Weighted forecast by stage, month and team, win rate and Excel export.</p></div>
+                    <div class="lp-card"><i class="fas fa-envelope-open-text"></i><h3>Reports on a schedule</h3><p>Build a report, then email it as CSV or PDF every day or week.</p></div>
+                    <div class="lp-card"><i class="fas fa-sliders"></i><h3>Shaped to your business</h3><p>Custom fields, your own pipeline stage names, workflow rules and message templates.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-section" id="how">
+            <div class="lp-wrap">
+                <h2>From first contact to loyal customer</h2>
+                <p>Four steps, one thread. Nothing is retyped between teams.</p>
+                <ol class="lp-steps">
+                    <li><span class="lp-num">1</span><h3>Capture</h3><p>Leads arrive from your website, live chat, WhatsApp, email or an import.</p></li>
+                    <li><span class="lp-num">2</span><h3>Win</h3><p>Work deals on the board, send quotes for approval and keep the forecast honest.</p></li>
+                    <li><span class="lp-num">3</span><h3>Deliver and collect</h3><p>Turn quotes into orders and invoices, record payments and chase what is overdue.</p></li>
+                    <li><span class="lp-num">4</span><h3>Serve and grow</h3><p>Resolve cases within SLA, watch customer health and renew before it is too late.</p></li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="lp-section lp-spot-wrap">
+            <div class="lp-wrap">
+                <div class="lp-spot">
+                    <div class="lp-spot-text">
+                        <span class="lp-kicker">Sell</span>
+                        <h2>A pipeline you can read at a glance</h2>
+                        <ul class="lp-ticks">
+                            <li>Drag and drop deals from stage to stage</li>
+                            <li>Set the win probability of each stage yourself</li>
+                            <li>Weighted forecast by month and by team</li>
+                        </ul>
+                    </div>
+                    <div class="lp-spot-art" aria-hidden="true">
+                        <div class="lp-board">
+                            <div class="lp-col"><b>Prospecting</b><i></i><i></i><i></i></div>
+                            <div class="lp-col"><b>Proposal</b><i class="hot"></i><i></i></div>
+                            <div class="lp-col"><b>Negotiation</b><i></i></div>
+                            <div class="lp-col"><b>Won</b><i class="won"></i><i class="won"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lp-spot rev">
+                    <div class="lp-spot-text">
+                        <span class="lp-kicker">Know</span>
+                        <h2>Customer 360: the whole story on one screen</h2>
+                        <ul class="lp-ticks">
+                            <li>Revenue, balance, documents and support in one view</li>
+                            <li>A health rating that tells you why, not just a colour</li>
+                            <li>A merged timeline of invoices, payments, orders and cases</li>
+                        </ul>
+                    </div>
+                    <div class="lp-spot-art" aria-hidden="true">
+                        <div class="lp-360">
+                            <div class="lp-360-top"><b>Customer name</b><span class="pill pill-high">At risk</span></div>
+                            <div class="lp-360-tiles"><div><small>Revenue</small><i></i></div><div><small>Open balance</small><i></i></div><div><small>Open cases</small><i></i></div></div>
+                            <div class="lp-tl"><span></span><em></em></div>
+                            <div class="lp-tl"><span></span><em></em></div>
+                            <div class="lp-tl"><span></span><em></em></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lp-spot" id="ai">
+                    <div class="lp-spot-text">
+                        <span class="lp-kicker">Automate</span>
+                        <h2>AI that proposes. People decide.</h2>
+                        <ul class="lp-ticks">
+                            <li>Agents draft follow-ups, suggest support categories and prepare renewal reminders</li>
+                            <li>They can run by themselves once a day if you switch them on</li>
+                            <li>Nothing happens until the right role approves, and every action is logged</li>
+                        </ul>
+                    </div>
+                    <div class="lp-spot-art" aria-hidden="true">
+                        <div class="lp-props">
+                            <div><span>Lead follow-up draft</span><em class="ok">Approve</em><em>Reject</em></div>
+                            <div><span>Support category suggestion</span><em class="ok">Approve</em><em>Reject</em></div>
+                            <div><span>Renewal reminder draft</span><em class="ok">Approve</em><em>Reject</em></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lp-spot rev">
+                    <div class="lp-spot-text">
+                        <span class="lp-kicker">Serve</span>
+                        <h2>Support that keeps its promises</h2>
+                        <ul class="lp-ticks">
+                            <li>SLA policies and queues by category</li>
+                            <li>Due-time status on every case, with alerts before a deadline slips</li>
+                            <li>A knowledge base and live chat for your own website</li>
+                        </ul>
+                    </div>
+                    <div class="lp-spot-art" aria-hidden="true">
+                        <div class="lp-cases">
+                            <div><i></i><span class="pill pill-low">Within SLA</span></div>
+                            <div><i></i><span class="pill pill-medium">Due soon</span></div>
+                            <div><i></i><span class="pill pill-low">Resolved</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-section" id="channels">
+            <div class="lp-wrap">
+                <h2>Every channel, one conversation</h2>
+                <p>Customers reach you wherever they like. Your team answers from one place, with the customer's history beside every message.</p>
+                <div class="lp-chips">
+                    <span><i class="fab fa-whatsapp"></i> WhatsApp</span>
+                    <span><i class="fas fa-comment-sms"></i> SMS</span>
+                    <span><i class="fas fa-phone"></i> Calls</span>
+                    <span><i class="fas fa-comments"></i> Live chat</span>
+                    <span><i class="fas fa-envelope"></i> Email</span>
+                    <span><i class="fab fa-google"></i> Gmail sync</span>
+                    <span><i class="fas fa-calendar-days"></i> Google and Outlook calendar</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-section" id="roles">
+            <div class="lp-wrap">
+                <h2>Built for every role in the company</h2>
+                <p>Each person sees the menus and dashboards their work needs, and nothing else.</p>
+                <div class="lp-roles">
+                    <div><i class="fas fa-bullseye"></i><h3>Sales reps</h3><p>Leads, deals, activities, quotes and a daily priority list.</p></div>
+                    <div><i class="fas fa-people-group"></i><h3>Sales managers</h3><p>Pipeline, forecast, targets, approvals and team performance.</p></div>
+                    <div><i class="fas fa-headset"></i><h3>Support agents</h3><p>Cases, SLAs, knowledge base, live chat and message templates.</p></div>
+                    <div><i class="fas fa-bullhorn"></i><h3>Marketing</h3><p>Campaigns, budgets, expenses and lead sources.</p></div>
+                    <div><i class="fas fa-file-invoice-dollar"></i><h3>Finance</h3><p>Invoices, payments, overdue balances and sales reports.</p></div>
+                    <div><i class="fas fa-user-shield"></i><h3>Administrators</h3><p>Users, roles, settings, connections, AI controls and the audit log.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-section" id="security">
+            <div class="lp-wrap">
+                <h2>Your data, your rules</h2>
+                <p>Control and traceability are part of the product, not an add-on.</p>
+                <div class="lp-features">
+                    <div class="lp-card"><i class="fas fa-user-lock"></i><h3>Roles by job</h3><p>Access follows the work. Pages and actions are limited by role.</p></div>
+                    <div class="lp-card"><i class="fas fa-mobile-screen-button"></i><h3>Two-factor sign-in</h3><p>Add a one-time code from an authenticator app for any user.</p></div>
+                    <div class="lp-card"><i class="fas fa-clock-rotate-left"></i><h3>Audit log</h3><p>See who changed what and when, including every approved AI action.</p></div>
+                    <div class="lp-card"><i class="fas fa-key"></i><h3>Protected secrets</h3><p>Keys for connected services are stored encrypted and never shown back on screen.</p></div>
+                    <div class="lp-card"><i class="fas fa-server"></i><h3>On your own server</h3><p>Each company runs its own copy with its own database.</p></div>
+                    <div class="lp-card"><i class="fas fa-file-import"></i><h3>Bring your data</h3><p>Import customers, contacts and leads from CSV, then check for duplicates.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-section" id="faq">
+            <div class="lp-wrap lp-narrow">
+                <h2>Questions, answered</h2>
+                <div class="lp-faq">
+                    <details>
+                        <summary>Does the AI act on its own?</summary>
+                        <p>No. Agents only propose. A person with the right role approves or rejects each proposal, and every decision is recorded in the audit log.</p>
+                    </details>
+                    <details>
+                        <summary>Can we run it on our own server?</summary>
+                        <p>Yes. Each company runs its own copy of Interlace with its own database, so your records stay under your control.</p>
+                    </details>
+                    <details>
+                        <summary>Which services can we connect?</summary>
+                        <p>Gmail, Google and Outlook calendar, WhatsApp, SMS, phone calls and outgoing email. Your administrator enters your own keys once on the Connections page.</p>
+                    </details>
+                    <details>
+                        <summary>Can we bring our existing customers?</summary>
+                        <p>Yes. Import customers, contacts and leads from CSV files, then use the duplicate finder to clean them up.</p>
+                    </details>
+                    <details>
+                        <summary>Will it fit the way we work?</summary>
+                        <p>Yes. Add your own fields, rename pipeline stages, set SLA policies and create workflow rules without writing code.</p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-section">
+            <div class="lp-wrap">
+                <div class="lp-band">
+                    <h2>Ready when you are</h2>
+                    <p>Sign in to see your day at a glance.</p>
+                    <div class="lp-cta">
+                        <a class="lp-btn lg" asp-page="/Accounts/Login">Sign in <i class="fas fa-arrow-right"></i></a>
+                        <a class="lp-btn lg ghost" asp-page="/Accounts/Register">Create account</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="lp-foot">
+        <div class="lp-wrap">
+            <div class="lp-foot-row">
+                <a class="lp-logo" href="/"><span class="lp-logo-mark"><i class="fas fa-bolt"></i></span>Interlace</a>
+                <div class="lp-links">
+                    <a href="#features">Features</a>
+                    <a href="#how">How it works</a>
+                    <a href="#security">Security</a>
+                    <a href="#faq">FAQ</a>
+                    <a asp-page="/Accounts/Login">Sign in</a>
+                </div>
+            </div>
+            <div class="lp-foot-copy">&copy; @DateTime.Now.Year Interlace CRM &middot; <b>Developed By:</b> WebAlt</div>
+        </div>
+    </footer>
 
     <script>
         (function () {
